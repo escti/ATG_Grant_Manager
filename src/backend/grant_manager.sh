@@ -15,20 +15,44 @@ export PATH=$ORACLE_HOME/bin:$PATH
 # Define onde o sqlplus buscará o tnsnames.ora (normalmente $ORACLE_HOME/network/admin)
 export TNS_ADMIN=$ORACLE_HOME/network/admin
 
-# 2. Credenciais (Hardcoded conforme solicitado)
-DB_USER="SVC_DBA"
-DB_PASS="svcpasswd"
-DB_TNS="DELTA1"
+# 2. Setup Base
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+ENV_FILE="$SCRIPT_DIR/.env"
+CATALOG_FILE="$SCRIPT_DIR/tns_catalog.conf"
+JIRA_SCRIPT="$SCRIPT_DIR/jira_validator.py"
+
+if [ -f "$ENV_FILE" ]; then
+    source "$ENV_FILE"
+else
+    echo "ERRO: Arquivo de ambiente (.env) não encontrado em $SCRIPT_DIR."
+    exit 1
+fi
 
 # 3. Recebimento de Variáveis
 USUARIO_GRANTED="$1"
 PRIVILEGIO="$2"
 OBJETO="$3"
 GRANTOR="$4"
+JIRA_TICKET="$5"
+DB_ID="$6"
 
 # 4. Validações Preliminares (Shell Level)
-if [[ -z "$USUARIO_GRANTED" || -z "$PRIVILEGIO" || -z "$OBJETO" || -z "$GRANTOR" ]]; then
-    echo "ERRO: Parâmetros insuficientes."
+if [[ -z "$USUARIO_GRANTED" || -z "$PRIVILEGIO" || -z "$OBJETO" || -z "$GRANTOR" || -z "$JIRA_TICKET" || -z "$DB_ID" ]]; then
+    echo "ERRO: Parâmetros insuficientes. Chamado Jira e Banco são obrigatórios."
+    exit 1
+fi
+
+# 4.1 Validação do Jira Ticket
+JIRA_OUTPUT=$(python3 "$JIRA_SCRIPT" "$JIRA_TICKET" 2>&1)
+if [ $? -ne 0 ]; then
+    echo "$JIRA_OUTPUT"
+    exit 1
+fi
+
+# 4.2 Carregar TNS String do Banco Alvo
+DB_TNS=$(awk -F'|' -v id="$DB_ID" '$1==id {print $3}' "$CATALOG_FILE")
+if [ -z "$DB_TNS" ]; then
+    echo "ERRO: Banco de dados '$DB_ID' não encontrado no tns_catalog.conf."
     exit 1
 fi
 
@@ -106,7 +130,8 @@ EOF
 )
 
 # 6. Execução
-RESULTADO=$(echo "$SQL_SCRIPT" | sqlplus -S ${DB_USER}/${DB_PASS}@${DB_TNS})
+# Usamos aspas no env DB_TNS no sqlplus para suportar ezconnect completo
+RESULTADO=$(echo "$SQL_SCRIPT" | sqlplus -S "${DB_USER}/${DB_PASS}@${DB_TNS}")
 
 # 7. Tratamento de Retorno
 if echo "$RESULTADO" | grep -q "STATUS:SUCESSO"; then

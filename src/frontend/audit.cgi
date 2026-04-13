@@ -3,8 +3,46 @@
 echo "Content-type: text/html"
 echo ""
 
-# Executa o backend para pegar os dados
-TABLE_ROWS=$(/usr/local/bin/grant_reporter.sh)
+# Pega parametros via GET
+DB_ID_VAL=""
+if [ "$REQUEST_METHOD" = "GET" ]; then
+    SAVEIFS=$IFS
+    IFS='&'
+    for param in $QUERY_STRING; do
+        if [[ $param == db_id=* ]]; then
+            DB_ID_VAL=$(echo $param | cut -d= -f2)
+        fi
+    done
+    IFS=$SAVEIFS
+fi
+
+DB_ID_CLEAN=$(echo "$DB_ID_VAL" | tr -cd '[:alnum:]_')
+
+# Carrega as opções de Banco de Dados do Catálogo
+CATALOG_FILE="/usr/local/bin/tns_catalog.conf"
+if [ ! -f "$CATALOG_FILE" ]; then
+    CATALOG_FILE="$(dirname "$0")/../backend/tns_catalog.conf"
+fi
+
+DB_OPTIONS=""
+if [ -f "$CATALOG_FILE" ]; then
+    while IFS='|' read -r dbid dbname dbstring; do
+        [[ "$dbid" =~ ^#.* ]] && continue
+        [ -z "$dbid" ] && continue
+        if [ "$dbid" == "$DB_ID_CLEAN" ]; then
+            DB_OPTIONS+="<option value=\"$dbid\" selected>$dbname</option>"
+        else
+            DB_OPTIONS+="<option value=\"$dbid\">$dbname</option>"
+        fi
+    done < "$CATALOG_FILE"
+fi
+
+# Executa o backend para pegar os dados caso banco selecionado
+if [ -n "$DB_ID_CLEAN" ]; then
+    TABLE_ROWS=$(/usr/local/bin/grant_reporter.sh "$DB_ID_CLEAN")
+else
+    TABLE_ROWS="<tr><td colspan='9' class='text-center py-4 text-muted'>Selecione um banco de dados para carregar os relatórios de concessão e auditoria.</td></tr>"
+fi
 
 # Renderiza o HTML
 cat <<EOF
@@ -59,11 +97,19 @@ cat <<EOF
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="text-primary fw-bold">AUDITORIA DE GRANTS</h2>
-            <p class="text-muted mb-0">Histórico completo de solicitações e revogações</p>
+            <p class="text-muted mb-0">Histórico de solicitações ativas e revogadas por sistema.</p>
         </div>
-        <a href="index.cgi" class="btn btn-outline-primary">
-            &larr; Nova Solicitação
-        </a>
+        <div class="d-flex gap-3 align-items-center">
+            <form method="GET" action="audit.cgi" class="d-flex gap-2 m-0">
+                <select class="form-select bg-dark text-white border-secondary" id="db_id" name="db_id" onchange="this.form.submit()" required>
+                    <option value="" disabled selected>Selecione um Banco...</option>
+                    $DB_OPTIONS
+                </select>
+            </form>
+            <a href="index.cgi" class="btn btn-outline-primary text-nowrap">
+                &larr; Conceder Permissões
+            </a>
+        </div>
     </div>
 
     <div class="card p-3">
@@ -91,7 +137,7 @@ cat <<EOF
     
     <div class="text-center mt-4 text-muted small">
         Atualizado em: $(date "+%d/%m/%Y %H:%M:%S") <br>
-        Versão: v1.0.0
+        Versão: v1.1.0
     </div>
 
 </div>

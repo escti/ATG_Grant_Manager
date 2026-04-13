@@ -11,10 +11,29 @@ export LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib
 export PATH=$ORACLE_HOME/bin:$PATH
 export TNS_ADMIN=$ORACLE_HOME/network/admin
 
-# 2. Credenciais
-DB_USER="SVC_DBA"
-DB_PASS="svcpasswd"
-DB_TNS="DELTA1"
+# 2. Setup Base
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+ENV_FILE="$SCRIPT_DIR/.env"
+CATALOG_FILE="$SCRIPT_DIR/tns_catalog.conf"
+
+if [ -f "$ENV_FILE" ]; then
+    source "$ENV_FILE"
+else
+    echo "ERRO: Arquivo de ambiente (.env) não encontrado."
+    exit 1
+fi
+
+DB_ID=$1
+if [ -z "$DB_ID" ]; then
+    echo "ERRO: Banco de dados não informado."
+    exit 1
+fi
+
+DB_TNS=$(awk -F'|' -v id="$DB_ID" '$1==id {print $3}' "$CATALOG_FILE")
+if [ -z "$DB_TNS" ]; then
+    echo "ERRO: Banco de dados '$DB_ID' não cadastrado."
+    exit 1
+fi
 
 # 3. Query SQL Geradora de HTML
 # Usamos concatenação para criar as tags <tr> e <td> diretamente.
@@ -56,4 +75,4 @@ EOF
 )
 
 # 4. Execução
-echo "$SQL_QUERY" | sqlplus -S ${DB_USER}/${DB_PASS}@${DB_TNS}
+echo "$SQL_QUERY" | sqlplus -S "${DB_USER}/${DB_PASS}@${DB_TNS}"

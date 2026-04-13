@@ -1,0 +1,7 @@
+# Arquivos de Segredo e Variáveis Locais
+src/backend/.env
+.env
+
+# Logs Shell
+*.out
+*.log
