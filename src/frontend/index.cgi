@@ -135,7 +135,7 @@ cat <<EOF
             </form>
             
             <div class="text-center mt-4 text-xs">
-                &copy; 2025 DBA Team - Segurança & Auditoria
+                &copy; 2026 DBA Team - Segurança & Auditoria | Versão: v1.0.0
             </div>
         </div>
     </div>
