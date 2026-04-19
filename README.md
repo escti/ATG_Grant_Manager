@@ -1,25 +1,72 @@
-# Oracle Grant Manager (OGM)
+# 🛡️ Oracle Grant Manager (OGM)
 
-## Visão Geral
-O Oracle Grant Manager é um sistema desenvolvido para automatizar de forma segura o processo de concessão de acessos em tabelas ou views para usuários nominais no Oracle, voltado diretamente para o usuário final (e não apenas para DBAs). Ele garante segurança corporativa ao conceder acessos temporários que são revogados automaticamente após 15 dias.
+[![Version](https://img.shields.io/badge/version-v1.1.0-blue.svg)](CHANGELOG.md)
+[![Oracle](https://img.shields.io/badge/Oracle-19c-red.svg)](https://www.oracle.com/database/)
+[![License](https://img.shields.io/badge/License-Internal-gray.svg)]()
 
-## Componentes da Solução
-A arquitetura é leve e foi concebida nas seguintes camadas:
-1. **Frontend (Interface Web)**: Scripts CGI (`index.cgi`, `audit.cgi`) utilizando HTML limpo com Bootstrap Dark Mode para prover uma interface amigável.
-2. **Backend (Shell Script)**: Scripts em Bash instalados no servidor Linux (`grant_manager.sh`, `grant_reporter.sh`) responsáveis por se comunicarem usando SqlPlus com o banco Oracle para executar Grants e Consultas de auditoria.
-3. **Banco de Dados (Oracle)**: Objetos DDL incluindo a tabela de controle de grants (`SVC_DBA.GRANT_CONTROL`) e um Job nativo (`DBMS_SCHEDULER`) para revogar (`REVOKE`) os grants expirados diariamente.
+O **Oracle Grant Manager** é uma solução de autoatendimento para usuários finais, projetada para automatizar e auditar a concessão de privilégios temporários em bancos de dados Oracle. O sistema garante que acessos sejam concedidos apenas sob demanda (via integração Jira) e revogados automaticamente após **15 dias**.
 
-## Estrutura do Repositório
-Para manter as melhores práticas e separar as camadas da aplicação, o repositório está subdividido em:
-- `src/frontend/`: Componentes visíveis (HTML/CSS gerado via scripts CGI).
-- `src/backend/`: Rotinas Shell com a lógica "oculta" do Grant e Report.
-- `src/db/`: Scripts DDL para criar usuários, tabelas, sequences e schedulers no banco Oracle.
-- `docs/`: Documentações de passos de instalação e documentação original.
-- `_old/`: Arquivos redundantes gerados durante testes e prototipagem.
+---
 
-## Fluxo Operacional
-1. O usuário (solicitante) acessa a interface web.
-2. Preenche os dados de usuário alvo, privilégio (SELECT, INSERT, UPDATE, DELETE) e objeto desejado.
-3. O Backend recebe requisição POST e envia de forma segura o comando de `GRANT` para o banco de dados Oracle.
-4. O resultado vira um registro de auditoria, contendo uma data calculada de +15 dias a frente.
-5. Em D+15, o Job do banco de dados, configurado na madrugada, varre a tabela e revoga automaticamente as permissões vencidas.
+## 🚀 Arquitetura do Sistema
+
+O OGM foi construído com uma arquitetura leve e segura, separando as preocupações em camadas:
+
+```mermaid
+graph TD
+    A[Usuário Final] -->|Acessa via Browser| B(Frontend CGI - Bootstrap 5)
+    B -->|Valida Chamado| C[Jira API]
+    B -->|Executa Requisição POST| D(Backend Shell Scripts)
+    D -->|Sanitiza Input| E[DBMS_ASSERT]
+    E -->|Executa GRANT| F[(Oracle Database)]
+    F -->|Loga Auditoria| G[SVC_DBA.GRANT_CONTROL]
+    F -->|Revogação Automática| H[[DBMS_SCHEDULER Job]]
+    H -->|Revoga Grant| G
+```
+
+---
+
+## ✨ Funcionalidades Principais
+
+- **Autoatendimento Seguro**: Interface web intuitiva para usuários solicitarem acesso.
+- **Validação de Chamado Jira**: Garante que o usuário possua um ticket aprovado antes de conceder o acesso.
+- **Segurança Reforçada**: Proteção contra SQL Injection usando `DBMS_ASSERT` e sanitização rigorosa via Shell.
+- **Revogação Automática**: Job nativo do Oracle garante que nenhum acesso expire sem ser revogado após 15 dias.
+- **Auditoria Transparente**: Painel de auditoria interativo para acompanhamento de todos os privilégios concedidos e revogados.
+- **Suporte Multi-Instância**: Gerencie grants em múltiplos bancos de dados a partir de uma única interface via catálogo TNS.
+
+---
+
+## 📂 Estrutura do Repositório
+
+- 🖥️ `src/frontend/`: Scripts CGI (`index.cgi`, `audit.cgi`) que geram a interface web.
+- ⚙️ `src/backend/`: Motor da aplicação (`grant_manager.sh`, `jira_validator.py`, `grant_reporter.sh`).
+- 🗄️ `src/db/`: Scripts DDL para tabelas, sequences e schedulers.
+- 📖 `docs/`: Documentação técnica e manuais de instalação.
+- 📦 `_old/`: Arquivos redundantes e legados mantidos para histórico.
+
+---
+
+## 🛠️ Requisitos de Instalação
+
+As instruções detalhadas de instalação podem ser encontradas em [docs/installation.md](docs/installation.md).
+
+### Pré-requisitos Rápidos:
+- Oracle Linux 8+
+- Servidor Web Apache (`httpd`) com suporte a CGI.
+- Oracle Instant Client (SqlPlus).
+- Python 3.x com biblioteca `requests` e `python-dotenv`.
+
+---
+
+## 🔐 Melhores Práticas de Segurança
+
+1. **Mínimo Privilégio**: O usuário de serviço `SVC_DBA` deve ter apenas as permissões necessárias para realizar grants nos objetos alvo.
+2. **Credenciais**: Utilize o arquivo `.env` para gerenciar senhas. Nunca submetas senhas reais ao repositório.
+3. **Restrição de Acesso**: Os scripts de backend (`/usr/local/bin/`) devem ter permissões restritas (ex: `chmod 750`).
+
+---
+
+<p align="center">
+  Desenvolvido pela Equipe DBA & Segurança | 2026
+</p>
