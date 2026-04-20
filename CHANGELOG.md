@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.0.2] - 2026-04-20
+### Fixed
+- **Estabilidade de Build**: Alterada a lógica de instalação do Oracle Instant Client para download direto via RPM por arquitetura (`arch`), eliminando dependência de busca de nomes de repositórios que variavam entre OCI e ambientes locais.
+
 ## [v2.0.1] - 2026-04-20
 ### Fixed
 - **Deploy OCI/ARM**: Ajustada a instalação do Oracle Instant Client no Dockerfile para utilizar o repositório de desenvolvedor, resolvendo falhas de build em instâncias ARM da OCI.
