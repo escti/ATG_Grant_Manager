@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   ogm-web:
     build: .

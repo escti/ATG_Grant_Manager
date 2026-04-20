@@ -2,11 +2,12 @@ FROM oraclelinux:8
 
 # Atualização de pacotes e instalação de dependências (Apache, Python3 e Dos2Unix)
 RUN dnf update -y && \
-    dnf install -y httpd python3 python3-pip dos2unix && \
+    dnf install -y httpd python3 python3-pip dos2unix dnf-plugins-core && \
     pip3 install requests python-dotenv
 
-# Instalação do Oracle Instant Client nativo do repositório Oracle Linux 8 (Suporte ARM/aarch64)
-RUN dnf install -y oracle-instantclient-release-el8 && \
+# Instalação do Oracle Instant Client (Estratégia robusta para OCI/ARM)
+RUN dnf install -y oraclelinux-developer-release-el8 && \
+    dnf config-manager --set-enabled ol8_oracle_instantclient && \
     dnf install -y oracle-instantclient-basic oracle-instantclient-sqlplus && \
     dnf clean all
 
