@@ -3,7 +3,7 @@ services:
     build: .
     container_name: ogm-web
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       # O .env e o tns_catalog não precisam estar dentro da imagem
       # pois frequentemente precisam ser modificados e contêm dados sensíveis.
