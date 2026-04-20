@@ -5,8 +5,13 @@ RUN dnf update -y && \
     dnf install -y httpd python3 python3-pip dos2unix dnf-plugins-core && \
     pip3 install requests python-dotenv
 
-# Instalação do Oracle Instant Client (Download direto do release por arquitetura)
-RUN dnf install -y https://yum.oracle.com/repo/OracleLinux/OL8/oracle_instantclient/$(arch)/getPackage/oracle-instantclient-release-el8-1.0-1.el8.$(arch).rpm && \
+# Instalação do Oracle Instant Client (Configuração direta do Repositório para garantir OCI/ARM e x86_64)
+RUN echo "[ol8_oracle_instantclient]" > /etc/yum.repos.d/oracle-instantclient.repo && \
+    echo "name=Oracle Instant Client for Oracle Linux 8" >> /etc/yum.repos.d/oracle-instantclient.repo && \
+    echo "baseurl=https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/\$basearch/" >> /etc/yum.repos.d/oracle-instantclient.repo && \
+    echo "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle" >> /etc/yum.repos.d/oracle-instantclient.repo && \
+    echo "gpgcheck=1" >> /etc/yum.repos.d/oracle-instantclient.repo && \
+    echo "enabled=1" >> /etc/yum.repos.d/oracle-instantclient.repo && \
     dnf install -y oracle-instantclient-basic oracle-instantclient-sqlplus && \
     dnf clean all
 
