@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.0.4] - 2026-04-20
+### Fixed
+- **Nomenclatura de Pacotes ARM**: Ajustada a diretiva de instalação do `dnf` no Dockerfile para utilizar curingas (`oracle-instantclient*-basic`), resolvendo o erro `No match for argument` causado pela presença da numeração de versão (ex: `19.19`) nos nomes dos pacotes do repositório OCI/ARM.
+
 ## [v2.0.3] - 2026-04-20
 ### Fixed
 - **Resolução de Repositório OCI**: Resolvido o erro de `404 Not Found` injetando diretamente o arquivo `.repo` oficial (`ol8_oracle_instantclient`) com a variável `$basearch` no Dockerfile, contornando a indisponibilidade ou mudança de caminhos dos pacotes de release em imagens mínimas da Oracle.

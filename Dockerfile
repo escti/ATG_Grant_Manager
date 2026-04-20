@@ -12,7 +12,7 @@ RUN echo "[ol8_oracle_instantclient]" > /etc/yum.repos.d/oracle-instantclient.re
     echo "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle" >> /etc/yum.repos.d/oracle-instantclient.repo && \
     echo "gpgcheck=1" >> /etc/yum.repos.d/oracle-instantclient.repo && \
     echo "enabled=1" >> /etc/yum.repos.d/oracle-instantclient.repo && \
-    dnf install -y oracle-instantclient-basic oracle-instantclient-sqlplus && \
+    dnf install -y oracle-instantclient*-basic oracle-instantclient*-sqlplus && \
     dnf clean all
 
 # Configuração do Apache (ServerName e Logs para o Docker)
