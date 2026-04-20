@@ -10,6 +10,10 @@ O **Oracle Grant Manager** é uma solução de autoatendimento para usuários fi
 
 ## 🚀 Arquitetura do Sistema
 
+Antes de qualquer alteração, estude a arquitetura do sistema:
+- FILE_MAP.md
+- skills.md
+
 O OGM foi construído com uma arquitetura leve e segura, separando as preocupações em camadas:
 
 ```mermaid
