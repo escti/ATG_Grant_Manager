@@ -1,6 +1,6 @@
 # 🛡️ Oracle Grant Manager (OGM)
 
-[![Version](https://img.shields.io/badge/version-v2.0.4-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v2.0.5-blue.svg)](CHANGELOG.md)
 [![Oracle](https://img.shields.io/badge/Oracle-19c-red.svg)](https://www.oracle.com/database/)
 [![License](https://img.shields.io/badge/License-Internal-gray.svg)]()
 
