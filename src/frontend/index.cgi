@@ -1,5 +1,5 @@
-# colocar este script em /var/www/cgi-bin/index.cgi
 #!/bin/bash
+# colocar este script em /var/www/cgi-bin/index.cgi
 
 echo "Content-type: text/html"
 echo ""
