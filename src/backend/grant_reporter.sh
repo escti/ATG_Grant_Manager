@@ -6,10 +6,12 @@
 # ==============================================================================
 
 # 1. Configuração do Ambiente (Idêntico ao manager)
-export ORACLE_HOME="/u01/app/oracle/product/19.0.0/dbhome_1"
-export LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib
-export PATH=$ORACLE_HOME/bin:$PATH
-export TNS_ADMIN=$ORACLE_HOME/network/admin
+if ! command -v sqlplus >/dev/null 2>&1; then
+    export ORACLE_HOME="${ORACLE_HOME:-/u01/app/oracle/product/19.0.0/dbhome_1}"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-$ORACLE_HOME/lib:/lib:/usr/lib}"
+    export PATH="$ORACLE_HOME/bin:$PATH"
+    export TNS_ADMIN="${TNS_ADMIN:-$ORACLE_HOME/network/admin}"
+fi
 
 # 2. Setup Base
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")

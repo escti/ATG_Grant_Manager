@@ -7,13 +7,14 @@
 # Descrição: Backend para concessão de grants com validação DBMS_ASSERT e Env Setup.
 # ==============================================================================
 
-# 1. Configuração do Ambiente Oracle (CRÍTICO PARA RODAR VIA APACHE)
-# Ajuste estes caminhos exatamente conforme sua instalação no servidor
-export ORACLE_HOME="/u01/app/oracle/product/19.0.0/dbhome_1"
-export LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib
-export PATH=$ORACLE_HOME/bin:$PATH
-# Define onde o sqlplus buscará o tnsnames.ora (normalmente $ORACLE_HOME/network/admin)
-export TNS_ADMIN=$ORACLE_HOME/network/admin
+# 1. Configuração do Ambiente Oracle (Híbrido: Bare Metal / Docker)
+# Se o sqlplus não estiver no PATH global (ex: instalação via RPM no Docker), define caminhos manuais
+if ! command -v sqlplus >/dev/null 2>&1; then
+    export ORACLE_HOME="${ORACLE_HOME:-/u01/app/oracle/product/19.0.0/dbhome_1}"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-$ORACLE_HOME/lib:/lib:/usr/lib}"
+    export PATH="$ORACLE_HOME/bin:$PATH"
+    export TNS_ADMIN="${TNS_ADMIN:-$ORACLE_HOME/network/admin}"
+fi
 
 # 2. Setup Base
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")

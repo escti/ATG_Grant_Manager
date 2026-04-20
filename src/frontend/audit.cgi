@@ -137,7 +137,7 @@ cat <<EOF
     
     <div class="text-center mt-4 text-muted small">
         Atualizado em: $(date "+%d/%m/%Y %H:%M:%S") <br>
-        Versão: v1.1.0
+        Versão: v2.0.0
     </div>
 
 </div>
