@@ -38,7 +38,7 @@ Seguimos rigorosamente o **Keep a Changelog** e **Semantic Versioning**:
 
 ## 5. Workflow de Alterações
 
-- **Registro em Git**: Ao final de toda alteração concluída, o agente DEVE perguntar ao usuário: "Deseja salvar as alterações no Git?" antes de prosseguir. Commits só devem ser feitos após confirmação explícita.
+- **Registro em Git**: Ao final de toda alteração concluída, o agente DEVE perguntar ao usuário: "Deseja salvar as alterações no Git?" antes de prosseguir. Commits só devem ser feitos após confirmação explícita. Após o commit, perguntar novamente: "Deseja fazer push para o repositório remoto?"
 - **Idioma Obrigatório**: Todo comentário técnico no código (Shell, Python, SQL, HTML, CSS) E toda mensagem de commit devem ser escritos exclusivamente em **Português (Brasil)**. Nenhum comentário ou mensagem em inglês será aceito.
 
 ---
