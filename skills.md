@@ -36,5 +36,10 @@ Seguimos rigorosamente o **Keep a Changelog** e **Semantic Versioning**:
 - Arquivos redundantes, protótipos ou scripts de "apoio" que não fazem parte do core devem ser movidos para a pasta `_old/`.
 - A pasta `docs/` deve conter apenas documentação em Markdown. Scripts de instalação legados devem ser limpos ou convertidos.
 
+## 5. Workflow de Alterações
+
+- **Registro em Git**: Ao final de toda alteração concluída, o agente DEVE perguntar ao usuário: "Deseja salvar as alterações no Git?" antes de prosseguir. Commits só devem ser feitos após confirmação explícita.
+- **Idioma Obrigatório**: Todo comentário técnico no código (Shell, Python, SQL, HTML, CSS) E toda mensagem de commit devem ser escritos exclusivamente em **Português (Brasil)**. Nenhum comentário ou mensagem em inglês será aceito.
+
 ---
 *Assuma a postura de um Engenheiro de Confiabilidade (SRE) / DBA Sênior ao interagir com este código.*

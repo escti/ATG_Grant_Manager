@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.1.0] - 2026-06-23
+### Added
+- **Skills Granulares**: Criado diretório `skills/` com três skills especializadas (`frontend.md`, `backend.md`, `database.md`) cada uma com frontmatter YAML, design system, regras imutáveis e checklist de verificação.
+- **SUMMARY.md**: Novo arquivo curado na raiz do projeto com árvore de diretórios descritiva, tabela de navegação rápida e regras de ouro, permitindo que qualquer agente entenda o projeto lendo um único arquivo.
+- **Frontmatter YAML**: Skills agora possuem metadados estruturados (`name` e `description`) para parse automatizado.
+
+### Changed
+- **skills.md**: Mantido como "Constituição" global do projeto, com as skills granulares atuando como extensões especializadas.
+- **Footer**: Versão atualizada para `v2.1.0` nos CGIs (`index.cgi`, `audit.cgi`).
+
 ## [v2.0.6] - 2026-04-20
 ### Changed
 - **Porta de Deploy**: Alterada a porta padrão de exposição do host de `80` para `8080` no `docker-compose.yml` para evitar conflitos com serviços de servidor web nativos (HTTPD/NGINX) já existentes no servidor de produção.
