@@ -1,7 +1,7 @@
 # 📋 SUMMARY — Oracle Grant Manager (OGM)
 
 **Stack:** Bash CGI + Bootstrap 5.3 + Python 3 + Oracle 19c  
-**Versão Atual:** `v2.1.0`  
+**Versão Atual:** `v2.2.0`  
 **Padrão:** Keep a Changelog + Semantic Versioning
 
 ---
@@ -37,7 +37,7 @@
 ├── .gitignore
 ├── docker-compose.yml         # Orquestração Docker
 ├── Dockerfile                 # Build da imagem (Oracle Linux 8)
-├── deploy.sh                  # Deploy automatizado
+├── deploy_OGM.sh              # Deploy automatizado
 │
 ├── src/
 │   ├── frontend/              # CGIs da interface web

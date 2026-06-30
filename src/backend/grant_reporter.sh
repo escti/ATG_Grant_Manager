@@ -32,9 +32,22 @@ if [ -z "$DB_ID" ]; then
 fi
 
 DB_TNS=$(awk -F'|' -v id="$DB_ID" '$1==id {print $3}' "$CATALOG_FILE")
+DB_TYPE=$(awk -F'|' -v id="$DB_ID" '$1==id {print $4}' "$CATALOG_FILE")
+[ -z "$DB_TYPE" ] && DB_TYPE="oracle"
 if [ -z "$DB_TNS" ]; then
     echo "ERRO: Banco de dados '$DB_ID' não cadastrado."
     exit 1
+fi
+
+# Roteamento para MySQL
+if [ "$DB_TYPE" = "mysql" ]; then
+    MYSQL_SCRIPT="$SCRIPT_DIR/mysql_grant_reporter.py"
+    if [ ! -f "$MYSQL_SCRIPT" ]; then
+        echo "<tr><td colspan='9' class='text-center py-4 text-muted'>Script MySQL ($MYSQL_SCRIPT) não encontrado. Aguardando implementação do colega.</td></tr>"
+        exit 0
+    fi
+    python3 "$MYSQL_SCRIPT" "$DB_TNS"
+    exit $?
 fi
 
 # 3. Query SQL Geradora de HTML

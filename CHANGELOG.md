@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.2.0] - 2026-06-30
+### Added
+- **Suporte Multi-SGBD**: Catálogo `tns_catalog.conf` agora possui 4º campo `dbtype` (oracle | mysql), preparando a infraestrutura para MySQL.
+- **Roteamento MySQL**: `grant_manager.sh` e `grant_reporter.sh` agora detectam o tipo do banco e encaminham a requisição para scripts Python específicos (`mysql_grant_manager.py` / `mysql_grant_reporter.py`) quando `dbtype=mysql`.
+- **Placeholders MySQL**: Criados `mysql_grant_manager.py` e `mysql_grant_reporter.py` (stubs) com a interface (contrato) documentada para o colega implementar a lógica real.
+- **Nova Interface de Privilégios**: Dropdown unificado para Oracle e MySQL com opções `CONSULTA` (SELECT), `EDIÇÃO` (INSERT, UPDATE, DELETE) e `AMBAS` (SELECT, INSERT, UPDATE, DELETE).
+- **Dependência Docker**: Instalação do pacote `mysql-connector-python` no `pip3` do Dockerfile.
+- **Config MySQL**: Adicionada seção de configuração MySQL no `.env.example`.
+
+### Changed
+- **Deploy Script**: Renomeado `deploy.sh` → `deploy_OGM.sh` para melhor identificação do projeto.
+- **Parser do Catálogo**: `index.cgi` e `audit.cgi` atualizados para ler 4 campos do `tns_catalog.conf` (compatível retroativo — 4º campo opcional, default `oracle`).
+
 ## [v2.1.0] - 2026-06-23
 ### Added
 - **Skills Granulares**: Criado diretório `skills/` com três skills especializadas (`frontend.md`, `backend.md`, `database.md`) cada uma com frontmatter YAML, design system, regras imutáveis e checklist de verificação.

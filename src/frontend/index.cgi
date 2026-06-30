@@ -14,9 +14,10 @@ fi
 
 DB_OPTIONS=""
 if [ -f "$CATALOG_FILE" ]; then
-    while IFS='|' read -r dbid dbname dbstring; do
+    while IFS='|' read -r dbid dbname dbstring dbtype; do
         [[ "$dbid" =~ ^#.* ]] && continue
         [ -z "$dbid" ] && continue
+        [ -z "$dbtype" ] && dbtype="oracle"
         DB_OPTIONS+="<option value=\"$dbid\">$dbname</option>"
     done < "$CATALOG_FILE"
 else
@@ -156,10 +157,9 @@ cat <<EOF
                     <div class="col-md-6 mb-3">
                         <label for="privilegio">Privilégio</label>
                         <select class="form-select" id="privilegio" name="privilegio">
-                            <option value="SELECT" selected>SELECT</option>
-                            <option value="INSERT">INSERT</option>
-                            <option value="UPDATE">UPDATE</option>
-                            <option value="DELETE">DELETE</option>
+                            <option value="CONSULTA" selected>CONSULTA (SELECT)</option>
+                            <option value="EDICAO">EDIÇÃO (INSERT, UPDATE, DELETE)</option>
+                            <option value="AMBAS">AMBAS (SELECT, INSERT, UPDATE, DELETE)</option>
                         </select>
                     </div>
                 </div>
@@ -179,7 +179,7 @@ cat <<EOF
             </form>
             
             <div class="text-center mt-4 text-xs">
-                &copy; 2026 DBA Team - Segurança & Auditoria | Versão: v2.1.0
+                &copy; 2026 DBA Team - Segurança & Auditoria | Versão: v2.2.0
             </div>
         </div>
     </div>

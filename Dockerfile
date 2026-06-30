@@ -3,7 +3,7 @@ FROM oraclelinux:8
 # Atualização de pacotes e instalação de dependências (Apache, Python3 e Dos2Unix)
 RUN dnf update -y && \
     dnf install -y httpd python3 python3-pip dos2unix dnf-plugins-core && \
-    pip3 install requests python-dotenv
+    pip3 install requests python-dotenv mysql-connector-python
 
 # Instalação do Oracle Instant Client (Configuração direta do Repositório para garantir OCI/ARM e x86_64)
 RUN echo "[ol8_oracle_instantclient]" > /etc/yum.repos.d/oracle-instantclient.repo && \

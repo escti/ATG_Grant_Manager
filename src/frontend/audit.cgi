@@ -26,9 +26,10 @@ fi
 
 DB_OPTIONS=""
 if [ -f "$CATALOG_FILE" ]; then
-    while IFS='|' read -r dbid dbname dbstring; do
+    while IFS='|' read -r dbid dbname dbstring dbtype; do
         [[ "$dbid" =~ ^#.* ]] && continue
         [ -z "$dbid" ] && continue
+        [ -z "$dbtype" ] && dbtype="oracle"
         if [ "$dbid" == "$DB_ID_CLEAN" ]; then
             DB_OPTIONS+="<option value=\"$dbid\" selected>$dbname</option>"
         else
@@ -137,7 +138,7 @@ cat <<EOF
     
     <div class="text-center mt-4 text-muted small">
         Atualizado em: $(date "+%d/%m/%Y %H:%M:%S") <br>
-        Versão: v2.1.0
+        Versão: v2.2.0
     </div>
 
 </div>

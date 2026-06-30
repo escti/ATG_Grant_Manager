@@ -50,17 +50,38 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 4.2 Carregar TNS String do Banco Alvo
+# 4.2 Carregar TNS String e Tipo do Banco Alvo
 DB_TNS=$(awk -F'|' -v id="$DB_ID" '$1==id {print $3}' "$CATALOG_FILE")
+DB_TYPE=$(awk -F'|' -v id="$DB_ID" '$1==id {print $4}' "$CATALOG_FILE")
+[ -z "$DB_TYPE" ] && DB_TYPE="oracle"
 if [ -z "$DB_TNS" ]; then
     echo "ERRO: Banco de dados '$DB_ID' não encontrado no tns_catalog.conf."
     exit 1
 fi
 
-# Whitelist de privilégios
-if [[ ! "$PRIVILEGIO" =~ ^(SELECT|INSERT|UPDATE|DELETE)$ ]]; then
-    echo "ERRO: Privilégio inválido."
-    exit 1
+# Mapeamento de privilégios abstratos para concreto
+case "$PRIVILEGIO" in
+    CONSULTA) PRIV_SQL="SELECT" ;;
+    EDICAO)   PRIV_SQL="INSERT, UPDATE, DELETE" ;;
+    AMBAS)    PRIV_SQL="SELECT, INSERT, UPDATE, DELETE" ;;
+    *) echo "ERRO: Privilégio inválido. Use CONSULTA, EDICAO ou AMBAS."; exit 1 ;;
+esac
+
+# Roteamento para MySQL
+if [ "$DB_TYPE" = "mysql" ]; then
+    MYSQL_SCRIPT="$SCRIPT_DIR/mysql_grant_manager.py"
+    if [ ! -f "$MYSQL_SCRIPT" ]; then
+        echo "ERRO: Script MySQL ($MYSQL_SCRIPT) não encontrado. Aguardando implementação do colega."
+        exit 1
+    fi
+    RESULTADO_MYSQL=$(python3 "$MYSQL_SCRIPT" "$USUARIO_GRANTED" "$PRIV_SQL" "$OBJETO" "$GRANTOR" "$JIRA_TICKET" "$DB_TNS" 2>&1)
+    if [ $? -eq 0 ]; then
+        echo "$RESULTADO_MYSQL"
+        exit 0
+    else
+        echo "ERRO: $RESULTADO_MYSQL"
+        exit 1
+    fi
 fi
 
 # 5. Construção do Script SQL com Segurança (DBMS_ASSERT)
@@ -72,7 +93,7 @@ WHENEVER SQLERROR EXIT SQL.SQLCODE ROLLBACK;
 DECLARE
     v_usuario_raw  VARCHAR2(128) := '$USUARIO_GRANTED';
     v_objeto_raw   VARCHAR2(128) := '$OBJETO';
-    v_privilegio   VARCHAR2(30)  := '$PRIVILEGIO'; -- Validado via Shell regex
+    v_privilegio   VARCHAR2(100) := '$PRIV_SQL'; -- Mapeado via Shell (CONSULTA/EDICAO/AMBAS)
     v_grantor      VARCHAR2(128) := '$GRANTOR';
     
     v_usuario_safe VARCHAR2(128);
