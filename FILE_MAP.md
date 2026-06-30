@@ -19,9 +19,10 @@ Abaixo estão descritos todos os arquivos que **realmente importam** para o func
 *   `.gitignore`: Arquivos ignorados pelo Git (importante manter o `.env` aqui).
 
 ### 🖥️ Frontend Web (`src/frontend/`)
-Contém scripts CGI que geram a interface HTML com Bootstrap 5 (Dark Mode).
-*   `index.cgi`: A interface principal de "autoatendimento" onde os usuários preenchem o form solicitando grant, validado contra um ticket do Jira.
-*   `audit.cgi`: Painel de auditoria visual onde os administradores ou usuários podem ver o histórico de grants concedidos e revogados.
+Contém scripts CGI que geram a interface HTML com **Tabler** (framework Bootstrap 5 com dark mode premium).
+*   `index.cgi`: A interface principal "Autoglass GRANT MANAGER | ATGGM" com sidebar profissional, formulário com input groups e feedback visual via alertas contextuais.
+*   `audit.cgi`: Painel de auditoria com cards de estatística dinâmicos, filtro por banco e tabela DataTables com dark mode.
+*   `prototipo/`: Protótipos HTML estáticos utilizados para aprovação do layout antes da implementação nos CGIs.
 
 ### ⚙️ Backend (Motor Shell/Python) (`src/backend/`)
 Processa requisições do frontend, valida tickets e dispara comandos pro banco.

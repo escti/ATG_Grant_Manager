@@ -1,60 +1,3 @@
-#!/bin/bash
-# colocar este script em /var/www/cgi-bin/index.cgi
-
-echo "Content-type: text/html"
-echo ""
-
-urldecode() { : "${*//+/ }"; echo -e "${_//%/\\x}"; }
-
-# Carrega as opções de Banco de Dados do Catálogo
-CATALOG_FILE="/usr/local/bin/tns_catalog.conf"
-if [ ! -f "$CATALOG_FILE" ]; then
-    CATALOG_FILE="$(dirname "$0")/../backend/tns_catalog.conf"
-fi
-
-DB_OPTIONS=""
-if [ -f "$CATALOG_FILE" ]; then
-    while IFS='|' read -r dbid dbname dbstring dbtype; do
-        [[ "$dbid" =~ ^#.* ]] && continue
-        [ -z "$dbid" ] && continue
-        [ -z "$dbtype" ] && dbtype="oracle"
-        DB_OPTIONS+="<option value=\"$dbid\">$dbname</option>"
-    done < "$CATALOG_FILE"
-else
-    DB_OPTIONS="<option value=\"\" disabled>Catálogo não encontrado</option>"
-fi
-
-if [ "$REQUEST_METHOD" = "POST" ]; then
-    read -n $CONTENT_LENGTH POST_DATA
-    eval $(echo "$POST_DATA" | awk -F'&' '{for(i=1;i<=NF;i++){print $i}}')
-    
-    USUARIO_VAL=$(urldecode "$usuario")
-    PRIVILEGIO_VAL=$(urldecode "$privilegio")
-    OBJETO_VAL=$(urldecode "$objeto")
-    GRANTOR_VAL=$(urldecode "$grantor")
-    JIRA_TICKET_VAL=$(urldecode "$jira_ticket")
-    DB_ID_VAL=$(urldecode "$db_id")
-    
-    # Sanitização Shell
-    USUARIO_CLEAN=$(echo "$USUARIO_VAL" | tr -cd '[:alnum:]_')
-    OBJETO_CLEAN=$(echo "$OBJETO_VAL" | tr -cd '[:alnum:]_$.')
-    GRANTOR_CLEAN=$(echo "$GRANTOR_VAL" | tr -cd '[:alnum:]_')
-    PRIVILEGIO_CLEAN=$(echo "$PRIVILEGIO_VAL" | tr -cd '[:alpha:]')
-    JIRA_TICKET_CLEAN=$(echo "$JIRA_TICKET_VAL" | tr -cd '[:alnum:]_-')
-    DB_ID_CLEAN=$(echo "$DB_ID_VAL" | tr -cd '[:alnum:]_')
-
-    OUTPUT=$(/usr/local/bin/grant_manager.sh "$USUARIO_CLEAN" "$PRIVILEGIO_CLEAN" "$OBJETO_CLEAN" "$GRANTOR_CLEAN" "$JIRA_TICKET_CLEAN" "$DB_ID_CLEAN")
-    RET_CODE=$?
-
-    if [ $RET_CODE -eq 0 ]; then
-        ALERT_HTML="<div class='alert alert-success d-flex align-items-center gap-3' role='alert'><i class='bi bi-check-circle-fill fs-4'></i><div><strong>Sucesso!</strong> $OUTPUT</div></div>"
-    else
-        ALERT_HTML="<div class='alert alert-danger d-flex align-items-center gap-3' role='alert'><i class='bi bi-x-circle-fill fs-4'></i><div><strong>Erro:</strong> $OUTPUT</div></div>"
-    fi
-fi
-
-# HTML Template - Tabler Dark Mode
-cat <<EOF
 <!DOCTYPE html>
 <html lang="pt-BR" data-bs-theme="dark">
 <head>
@@ -64,7 +7,7 @@ cat <<EOF
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <style>
-    body { background-color: #0f1117; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background-color: #0f1117; }
     .page { background-color: #0f1117; }
     .navbar-vertical { background-color: #15171e !important; border-right: 1px solid #1e2130; }
     .navbar-vertical .nav-link { color: #8b8fa3; border-radius: 8px; margin: 2px 8px; }
@@ -84,28 +27,33 @@ cat <<EOF
     .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(53, 132, 228, 0.35); }
     .btn-outline-primary { border-color: #3584e4; color: #3584e4; border-radius: 8px; }
     .btn-outline-primary:hover { background: #3584e4; border-color: #3584e4; }
-    .page-title { font-size: 1.3rem; font-weight: 700; color: #e6e7ed; }
-    .page-title small { font-size: 0.8rem; font-weight: 400; color: #8b8fa3; display: block; }
+    .stat-card { border-radius: 12px; padding: 1.25rem; background: linear-gradient(135deg, #1c1e2a 0%, #222538 100%); border: 1px solid #2a2d3a; }
+    .stat-card .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .stat-card .stat-value { font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1; }
+    .stat-card .stat-label { font-size: 0.75rem; color: #8b8fa3; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-soft-success { background: rgba(46, 213, 115, 0.12); color: #2ed573; border-radius: 6px; padding: 0.3rem 0.7rem; }
+    .badge-soft-info { background: rgba(53, 132, 228, 0.12); color: #62a0ea; border-radius: 6px; padding: 0.3rem 0.7rem; }
     .alert { border-radius: 10px; border: none; }
     .alert-success { background: rgba(46, 213, 115, 0.1); border-left: 4px solid #2ed573; color: #2ed573; }
     .alert-danger { background: rgba(255, 71, 87, 0.1); border-left: 4px solid #ff4757; color: #ff4757; }
     .alert-info { background: rgba(53, 132, 228, 0.1); border-left: 4px solid #3584e4; color: #62a0ea; }
-    .footer { border-top: 1px solid #2a2d3a; padding: 1rem 1.5rem; }
-    .badge-soft-info { background: rgba(53, 132, 228, 0.12); color: #62a0ea; border-radius: 6px; padding: 0.3rem 0.7rem; }
+    .page-title { font-size: 1.3rem; font-weight: 700; color: #e6e7ed; }
+    .page-title small { font-size: 0.8rem; font-weight: 400; color: #8b8fa3; display: block; }
     .divider { border-color: #2a2d3a; opacity: 0.6; }
     hr { border-color: #2a2d3a; }
+    .footer { border-top: 1px solid #2a2d3a; }
   </style>
 </head>
 <body>
   <div class="page">
 
-    <!-- SIDEBAR -->
+    <!-- ==================== SIDEBAR ==================== -->
     <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
       <div class="container-fluid">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <a href="index.cgi" class="navbar-brand navbar-brand-autodark">
+        <a href="index.html" class="navbar-brand navbar-brand-autodark">
           <span>
             <span class="logo-text">ATGGM</span>
             <br><span class="logo-sub">Autoglass Grant Manager</span>
@@ -114,21 +62,28 @@ cat <<EOF
         <div class="collapse navbar-collapse" id="sidebar-menu">
           <ul class="navbar-nav pt-4">
             <li class="nav-item mb-1">
-              <a class="nav-link active" href="index.cgi">
+              <a class="nav-link active" href="index.html">
                 <i class="bi bi-shield-check me-2"></i> Solicitar Grant
               </a>
             </li>
             <li class="nav-item mb-1">
-              <a class="nav-link" href="audit.cgi">
+              <a class="nav-link" href="audit.html">
                 <i class="bi bi-clock-history me-2"></i> Auditoria
               </a>
             </li>
           </ul>
+          <hr class="my-3 mx-3">
+          <div class="px-3 mt-auto">
+            <div class="d-flex align-items-center gap-2 text-muted small">
+              <i class="bi bi-database"></i>
+              <span id="sidebar-status">Verificando...</span>
+            </div>
+          </div>
         </div>
       </div>
     </aside>
 
-    <!-- CONTEUDO -->
+    <!-- ==================== CONTEUDO ==================== -->
     <div class="page-wrapper">
 
       <!-- Header -->
@@ -138,13 +93,13 @@ cat <<EOF
             <div class="col">
               <h2 class="page-title">
                 Solicitar Grant
-                <small>Preencha o formulario para conceder acesso temporario a um banco de dados</small>
+                <small>Preencha o formulário para conceder acesso temporário a um banco de dados</small>
               </h2>
             </div>
-            <div class="col-auto">
-              <a href="audit.cgi" class="btn btn-outline-primary">
-                <i class="bi bi-clock-history me-1"></i> Auditoria
-              </a>
+            <div class="col-auto d-flex gap-2">
+              <span class="badge-soft-info px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-database"></i> <span id="header-db-count">1 banco disponível</span>
+              </span>
             </div>
           </div>
         </div>
@@ -154,14 +109,15 @@ cat <<EOF
       <div class="page-body">
         <div class="container-xl">
 
-          $ALERT_HTML
+          <!-- Alert de exemplo (simula sucesso/erro) -->
+          <div id="alert-area"></div>
 
           <!-- Banner Jira -->
           <div class="alert alert-info d-flex align-items-center gap-3 mb-4" role="alert">
             <i class="bi bi-info-circle-fill fs-4"></i>
             <div>
-              <strong>Atencao:</strong> E necessario ter um chamado aprovado pelo Gestor para prosseguir.
-              <a href="https://jira.autoglass.com.br/servicedesk/customer/portal/exemplo" target="_blank" class="alert-link ms-1">Clique aqui para abrir seu chamado de acesso ao banco.</a>
+              <strong>Atenção:</strong> É necessário ter um chamado aprovado pelo Gestor para prosseguir.
+              <a href="#" class="alert-link ms-1">Clique aqui para abrir seu chamado de acesso ao banco.</a>
             </div>
           </div>
 
@@ -170,69 +126,83 @@ cat <<EOF
             <div class="card-header d-flex align-items-center gap-3">
               <i class="bi bi-pencil-square fs-4 text-primary"></i>
               <div>
-                <h3 class="card-title mb-0">Nova Solicitacao de Acesso</h3>
-                <p class="text-muted small mb-0">Preencha todos os campos obrigatorios</p>
+                <h3 class="card-title mb-0">Nova Solicitação de Acesso</h3>
+                <p class="text-muted small mb-0">Preencha todos os campos obrigatórios</p>
               </div>
             </div>
             <div class="card-body">
-              <form method="POST" action="index.cgi">
+              <form action="#" method="POST" onsubmit="return simularEnvio(event)">
 
+                <!-- Linha 1 -->
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
                     <label class="form-label" for="db_id">Banco Alvo</label>
-                    <select class="form-select" id="db_id" name="db_id" required>
+                    <select class="form-select" id="db_id" required>
                       <option value="" disabled selected>Selecione o banco...</option>
-                      $DB_OPTIONS
+                      <option value="OGMLAB">Banco de Laboratório (OGMLAB)</option>
+                      <option value="MYSQL01">MySQL — Dev (MYSQL01)</option>
                     </select>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label" for="jira_ticket">Chamado Jira (Aprovado)</label>
                     <div class="input-group">
-                      <span class="input-group-text bg-dark border-secondary"><i class="bi bi-ticket"></i></span>
-                      <input type="text" class="form-control" id="jira_ticket" name="jira_ticket" required placeholder="Ex: ATG-1234">
+                      <span class="input-group-text bg-dark border-secondary">
+                        <i class="bi bi-ticket"></i>
+                      </span>
+                      <input type="text" class="form-control" id="jira_ticket" placeholder="Ex: ATG-1234" required>
                     </div>
                   </div>
                 </div>
 
+                <!-- Linha 2 -->
                 <div class="mb-3">
-                  <label class="form-label" for="grantor">Solicitante (DBA / Responsavel)</label>
+                  <label class="form-label" for="grantor">Solicitante (DBA / Responsável)</label>
                   <div class="input-group">
-                    <span class="input-group-text bg-dark border-secondary"><i class="bi bi-person-badge"></i></span>
-                    <input type="text" class="form-control" id="grantor" name="grantor" required placeholder="Ex: JOAO.SILVA" autocomplete="off">
+                    <span class="input-group-text bg-dark border-secondary">
+                      <i class="bi bi-person-badge"></i>
+                    </span>
+                    <input type="text" class="form-control" id="grantor" placeholder="Ex: JOAO.SILVA" required autocomplete="off">
                   </div>
                 </div>
 
                 <hr class="divider my-4">
 
+                <!-- Linha 3 -->
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
-                    <label class="form-label" for="usuario">Usuario / Role Destino</label>
+                    <label class="form-label" for="usuario">Usuário / Role Destino</label>
                     <div class="input-group">
-                      <span class="input-group-text bg-dark border-secondary"><i class="bi bi-person"></i></span>
-                      <input type="text" class="form-control" id="usuario" name="usuario" required placeholder="Ex: MARIA.SOUZA">
+                      <span class="input-group-text bg-dark border-secondary">
+                        <i class="bi bi-person"></i>
+                      </span>
+                      <input type="text" class="form-control" id="usuario" placeholder="Ex: MARIA.SOUZA" required>
                     </div>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label" for="privilegio">Privilegio</label>
-                    <select class="form-select" id="privilegio" name="privilegio">
+                    <label class="form-label" for="privilegio">Privilégio</label>
+                    <select class="form-select" id="privilegio">
                       <option value="CONSULTA" selected>CONSULTA (SELECT)</option>
-                      <option value="EDICAO">EDICAO (INSERT, UPDATE, DELETE)</option>
+                      <option value="EDICAO">EDIÇÃO (INSERT, UPDATE, DELETE)</option>
                       <option value="AMBAS">AMBAS (SELECT, INSERT, UPDATE, DELETE)</option>
                     </select>
                   </div>
                 </div>
 
+                <!-- Linha 4 -->
                 <div class="mb-4">
                   <label class="form-label" for="objeto">Objeto Alvo (Schema.Tabela)</label>
                   <div class="input-group">
-                    <span class="input-group-text bg-dark border-secondary"><i class="bi bi-table"></i></span>
-                    <input type="text" class="form-control" id="objeto" name="objeto" required placeholder="Ex: HR.EMPLOYEES">
+                    <span class="input-group-text bg-dark border-secondary">
+                      <i class="bi bi-table"></i>
+                    </span>
+                    <input type="text" class="form-control" id="objeto" placeholder="Ex: HR.EMPLOYEES" required>
                   </div>
                   <div class="mt-1">
-                    <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Certifique-se que o Schema esta correto.</small>
+                    <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Certifique-se que o Schema está correto.</small>
                   </div>
                 </div>
 
+                <!-- Submit -->
                 <button type="submit" class="btn btn-primary w-100 py-2">
                   <i class="bi bi-shield-lock-fill me-2"></i>
                   Conceder Acesso
@@ -249,7 +219,7 @@ cat <<EOF
         <div class="container-fluid">
           <div class="row align-items-center">
             <div class="col text-muted small">
-              &copy; 2026 DBA Team &mdash; Seguranca &amp; Auditoria
+              &copy; 2026 DBA Team — Segurança &amp; Auditoria
             </div>
             <div class="col-auto text-muted small">
               <span class="badge-soft-info px-2">v2.3.0</span>
@@ -261,6 +231,19 @@ cat <<EOF
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <script>
+    function simularEnvio(e) {
+      e.preventDefault();
+      var alertArea = document.getElementById('alert-area');
+      var usuario = document.getElementById('usuario').value || 'MARIA.SOUZA';
+      alertArea.innerHTML =
+        '<div class="alert alert-success d-flex align-items-center gap-3" role="alert">' +
+        '<i class="bi bi-check-circle-fill fs-4"></i>' +
+        '<div><strong>Sucesso!</strong> Grant aplicado com sucesso em <strong>HR.EMPLOYEES</strong> para <strong>' + usuario + '</strong>.</div>' +
+        '</div>';
+      setTimeout(function() { alertArea.innerHTML = ''; }, 5000);
+      return false;
+    }
+  </script>
 </body>
 </html>
-EOF

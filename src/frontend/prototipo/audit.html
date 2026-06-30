@@ -1,54 +1,3 @@
-#!/bin/bash
-
-echo "Content-type: text/html"
-echo ""
-
-# Pega parametros via GET
-DB_ID_VAL=""
-if [ "$REQUEST_METHOD" = "GET" ]; then
-    SAVEIFS=$IFS
-    IFS='&'
-    for param in $QUERY_STRING; do
-        if [[ $param == db_id=* ]]; then
-            DB_ID_VAL=$(echo $param | cut -d= -f2)
-        fi
-    done
-    IFS=$SAVEIFS
-fi
-
-DB_ID_CLEAN=$(echo "$DB_ID_VAL" | tr -cd '[:alnum:]_')
-
-# Carrega as opções de Banco de Dados do Catálogo
-CATALOG_FILE="/usr/local/bin/tns_catalog.conf"
-if [ ! -f "$CATALOG_FILE" ]; then
-    CATALOG_FILE="$(dirname "$0")/../backend/tns_catalog.conf"
-fi
-
-DB_OPTIONS=""
-if [ -f "$CATALOG_FILE" ]; then
-    while IFS='|' read -r dbid dbname dbstring dbtype; do
-        [[ "$dbid" =~ ^#.* ]] && continue
-        [ -z "$dbid" ] && continue
-        [ -z "$dbtype" ] && dbtype="oracle"
-        if [ "$dbid" == "$DB_ID_CLEAN" ]; then
-            DB_OPTIONS+="<option value=\"$dbid\" selected>$dbname</option>"
-        else
-            DB_OPTIONS+="<option value=\"$dbid\">$dbname</option>"
-        fi
-    done < "$CATALOG_FILE"
-fi
-
-# Executa o backend para pegar os dados caso banco selecionado
-if [ -n "$DB_ID_CLEAN" ]; then
-    TABLE_ROWS=$(/usr/local/bin/grant_reporter.sh "$DB_ID_CLEAN")
-else
-    TABLE_ROWS="<tr><td colspan='9' class='text-center py-4 text-muted'>Selecione um banco de dados para carregar os relatórios de concessão e auditoria.</td></tr>"
-fi
-
-# Renderiza o HTML
-DATA_ATUAL=$(date "+%d/%m/%Y %H:%M:%S")
-
-cat <<EOF
 <!DOCTYPE html>
 <html lang="pt-BR" data-bs-theme="dark">
 <head>
@@ -59,7 +8,7 @@ cat <<EOF
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
   <style>
-    body { background-color: #0f1117; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background-color: #0f1117; }
     .page { background-color: #0f1117; }
     .navbar-vertical { background-color: #15171e !important; border-right: 1px solid #1e2130; }
     .navbar-vertical .nav-link { color: #8b8fa3; border-radius: 8px; margin: 2px 8px; }
@@ -87,8 +36,7 @@ cat <<EOF
     .badge-soft-warning { background: rgba(255, 183, 77, 0.12); color: #ffb74d; border-radius: 6px; padding: 0.3rem 0.7rem; }
     .badge-soft-danger { background: rgba(255, 71, 87, 0.12); color: #ff4757; border-radius: 6px; padding: 0.3rem 0.7rem; }
     .badge-soft-secondary { background: rgba(139, 143, 163, 0.12); color: #8b8fa3; border-radius: 6px; padding: 0.3rem 0.7rem; }
-    .badge-soft-info { background: rgba(53, 132, 228, 0.12); color: #62a0ea; border-radius: 6px; padding: 0.3rem 0.7rem; }
-    .table { color: #e6e7ed; font-size: 0.85rem; margin-bottom: 0; }
+    .table { color: #e6e7ed; font-size: 0.85rem; }
     .table thead th { border-bottom: 2px solid #2a2d3a; color: #8b8fa3; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
     .table tbody td { border-color: #2a2d3a; vertical-align: middle; }
     .table tbody tr:hover { background: rgba(53, 132, 228, 0.04); }
@@ -100,19 +48,19 @@ cat <<EOF
     .page-link { background: #252836; border-color: #33364a; color: #e6e7ed; }
     .page-item.active .page-link { background: #3584e4; border-color: #3584e4; }
     .page-item.disabled .page-link { background: #1c1e2a; border-color: #2a2d3a; color: #555; }
-    .footer { border-top: 1px solid #2a2d3a; padding: 1rem 1.5rem; background: transparent; }
+    .footer { border-top: 1px solid #2a2d3a; }
   </style>
 </head>
 <body>
   <div class="page">
 
-    <!-- SIDEBAR -->
+    <!-- ==================== SIDEBAR ==================== -->
     <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
       <div class="container-fluid">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <a href="index.cgi" class="navbar-brand navbar-brand-autodark">
+        <a href="index.html" class="navbar-brand navbar-brand-autodark">
           <span>
             <span class="logo-text">ATGGM</span>
             <br><span class="logo-sub">Autoglass Grant Manager</span>
@@ -121,21 +69,28 @@ cat <<EOF
         <div class="collapse navbar-collapse" id="sidebar-menu">
           <ul class="navbar-nav pt-4">
             <li class="nav-item mb-1">
-              <a class="nav-link" href="index.cgi">
+              <a class="nav-link" href="index.html">
                 <i class="bi bi-shield-check me-2"></i> Solicitar Grant
               </a>
             </li>
             <li class="nav-item mb-1">
-              <a class="nav-link active" href="audit.cgi">
+              <a class="nav-link active" href="audit.html">
                 <i class="bi bi-clock-history me-2"></i> Auditoria
               </a>
             </li>
           </ul>
+          <hr class="my-3 mx-3">
+          <div class="px-3 mt-auto">
+            <div class="d-flex align-items-center gap-2 text-muted small">
+              <i class="bi bi-database"></i>
+              <span>Conectado</span>
+            </div>
+          </div>
         </div>
       </div>
     </aside>
 
-    <!-- CONTEUDO -->
+    <!-- ==================== CONTEUDO ==================== -->
     <div class="page-wrapper">
 
       <!-- Header -->
@@ -145,18 +100,12 @@ cat <<EOF
             <div class="col">
               <h2 class="page-title">
                 Auditoria de Grants
-                <small>Historico completo de solicitacoes ativas e revogadas</small>
+                <small>Histórico completo de solicitações ativas e revogadas</small>
               </h2>
             </div>
             <div class="col-auto d-flex gap-2">
-              <form method="GET" action="audit.cgi" class="d-flex gap-2 m-0">
-                <select class="form-select" id="db_id" name="db_id" onchange="this.form.submit()">
-                  <option value="" disabled selected>Selecione um Banco...</option>
-                  $DB_OPTIONS
-                </select>
-              </form>
-              <a href="index.cgi" class="btn btn-outline-primary">
-                <i class="bi bi-plus-lg me-1"></i> Nova Solicitacao
+              <a href="index.html" class="btn btn-outline-primary">
+                <i class="bi bi-plus-lg me-1"></i> Nova Solicitação
               </a>
             </div>
           </div>
@@ -175,8 +124,8 @@ cat <<EOF
                   <i class="bi bi-list-check"></i>
                 </div>
                 <div>
-                  <div class="stat-value" id="stat-total">--</div>
-                  <div class="stat-label">Total de Solicitacoes</div>
+                  <div class="stat-value" id="stat-total">05</div>
+                  <div class="stat-label">Total de Solicitações</div>
                 </div>
               </div>
             </div>
@@ -186,7 +135,7 @@ cat <<EOF
                   <i class="bi bi-check-circle"></i>
                 </div>
                 <div>
-                  <div class="stat-value" id="stat-ativos">--</div>
+                  <div class="stat-value">03</div>
                   <div class="stat-label">Ativos (Sucesso)</div>
                 </div>
               </div>
@@ -197,7 +146,7 @@ cat <<EOF
                   <i class="bi bi-archive"></i>
                 </div>
                 <div>
-                  <div class="stat-value" id="stat-revogados">--</div>
+                  <div class="stat-value">01</div>
                   <div class="stat-label">Revogados</div>
                 </div>
               </div>
@@ -208,8 +157,41 @@ cat <<EOF
                   <i class="bi bi-x-circle"></i>
                 </div>
                 <div>
-                  <div class="stat-value" id="stat-erros">--</div>
+                  <div class="stat-value">01</div>
                   <div class="stat-label">Com Erro</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtro -->
+          <div class="card mb-4">
+            <div class="card-body py-3">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                  <label class="form-label" for="db-filter">Banco de Dados</label>
+                  <select class="form-select" id="db-filter">
+                    <option value="">Todos os Bancos</option>
+                    <option value="OGMLAB">Banco de Laboratório (OGMLAB)</option>
+                    <option value="MYSQL01">MySQL — Dev (MYSQL01)</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="status-filter">Status</label>
+                  <select class="form-select" id="status-filter">
+                    <option value="">Todos</option>
+                    <option value="SUCESSO">Sucesso</option>
+                    <option value="REVOGADO">Revogado</option>
+                    <option value="ERRO">Erro</option>
+                  </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                  <button class="btn btn-outline-primary flex-fill" onclick="filtrar()">
+                    <i class="bi bi-funnel me-1"></i> Filtrar
+                  </button>
+                  <button class="btn btn-outline-secondary flex-fill" onclick="limparFiltro()">
+                    <i class="bi bi-x-circle me-1"></i> Limpar
+                  </button>
                 </div>
               </div>
             </div>
@@ -219,22 +201,76 @@ cat <<EOF
           <div class="card">
             <div class="card-body p-0">
               <div class="table-responsive">
-                <table id="auditTable" class="table table-striped table-hover mb-0 w-100">
+                <table id="auditTable" class="table table-striped table-hover mb-0">
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Usuario Destino</th>
-                      <th>Privilegio</th>
+                      <th>Usuário Destino</th>
+                      <th>Privilégio</th>
                       <th>Objeto</th>
                       <th>Solicitante</th>
-                      <th>Data Inicio</th>
+                      <th>Data Início</th>
                       <th>Expira em</th>
                       <th>Status</th>
-                      <th>Observacoes</th>
+                      <th>Observações</th>
                     </tr>
                   </thead>
                   <tbody>
-                    $TABLE_ROWS
+                    <tr>
+                      <td>001</td>
+                      <td><strong>MARIA.SOUZA</strong></td>
+                      <td>SELECT</td>
+                      <td>HR.EMPLOYEES</td>
+                      <td>JOAO.SILVA</td>
+                      <td>30/06/2026 14:22</td>
+                      <td>15/07/2026</td>
+                      <td><span class="badge-soft-success px-2 py-1">SUCESSO</span></td>
+                      <td class="text-muted small">Grant aplicado via Web (Secure)</td>
+                    </tr>
+                    <tr>
+                      <td>002</td>
+                      <td><strong>PEDRO.ALVES</strong></td>
+                      <td>INSERT, UPDATE, DELETE</td>
+                      <td>FIN.PAGAMENTOS</td>
+                      <td>ANA.COSTA</td>
+                      <td>28/06/2026 09:15</td>
+                      <td>13/07/2026</td>
+                      <td><span class="badge-soft-success px-2 py-1">SUCESSO</span></td>
+                      <td class="text-muted small">Grant aplicado via Web (Secure)</td>
+                    </tr>
+                    <tr>
+                      <td>003</td>
+                      <td><strong>CARLOS.LIMA</strong></td>
+                      <td>SELECT, INSERT, UPDATE, DELETE</td>
+                      <td>VENDAS.PEDIDOS</td>
+                      <td>JOAO.SILVA</td>
+                      <td>25/06/2026 11:00</td>
+                      <td>10/07/2026</td>
+                      <td><span class="badge-soft-success px-2 py-1">SUCESSO</span></td>
+                      <td class="text-muted small">Grant aplicado via Web (Secure)</td>
+                    </tr>
+                    <tr>
+                      <td>004</td>
+                      <td><strong>LUCIA.MENDES</strong></td>
+                      <td>SELECT</td>
+                      <td>RH.FUNCIONARIOS</td>
+                      <td>ANA.COSTA</td>
+                      <td>10/06/2026 08:30</td>
+                      <td>25/06/2026</td>
+                      <td><span class="badge-soft-secondary px-2 py-1">REVOGADO</span></td>
+                      <td class="text-muted small">Revogado automaticamente pelo Job</td>
+                    </tr>
+                    <tr>
+                      <td>005</td>
+                      <td><strong>TESTE.USUARIO</strong></td>
+                      <td>SELECT</td>
+                      <td>HR.DEPARTMENTS</td>
+                      <td>SISTEMA</td>
+                      <td>20/06/2026 16:45</td>
+                      <td>--</td>
+                      <td><span class="badge-soft-danger px-2 py-1">ERRO</span></td>
+                      <td class="text-muted small">ORA-00942: tabela ou view não existe</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -249,11 +285,11 @@ cat <<EOF
         <div class="container-fluid">
           <div class="row align-items-center">
             <div class="col text-muted small">
-              &copy; 2026 DBA Team &mdash; Seguranca &amp; Auditoria
+              &copy; 2026 DBA Team — Segurança &amp; Auditoria
             </div>
             <div class="col-auto text-muted small">
-              Atualizado em: $DATA_ATUAL
-              &nbsp;&middot;&nbsp;
+              Atualizado em: <span id="footer-timestamp">30/06/2026 18:46</span>
+              &nbsp;·&nbsp;
               <span class="badge-soft-info px-2">v2.3.0</span>
             </div>
           </div>
@@ -266,33 +302,26 @@ cat <<EOF
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-
   <script>
+    var tabela;
     $(document).ready(function () {
-      var tabela = $('#auditTable').DataTable({
+      tabela = $('#auditTable').DataTable({
         order: [[0, 'desc']],
         language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json' },
         pageLength: 10,
-        lengthMenu: [10, 25, 50, 100],
-        drawCallback: function () {
-          var api = this.api();
-          var total = api.rows().count();
-          var dados = api.column(7).data();
-          var ativos = 0, revogados = 0, erros = 0;
-          dados.each(function (val) {
-            var s = val.replace(/<[^>]+>/g, '').trim().toUpperCase();
-            if (s.indexOf('SUCESSO') !== -1) ativos++;
-            else if (s.indexOf('REVOGADO') !== -1) revogados++;
-            else if (s.indexOf('ERRO') !== -1) erros++;
-          });
-          $('#stat-total').text(total);
-          $('#stat-ativos').text(ativos);
-          $('#stat-revogados').text(revogados);
-          $('#stat-erros').text(erros);
-        }
+        lengthMenu: [10, 25, 50, 100]
       });
     });
+    function filtrar() {
+      var db = document.getElementById('db-filter').value;
+      var status = document.getElementById('status-filter').value;
+      tabela.columns(7).search(status).draw();
+    }
+    function limparFiltro() {
+      document.getElementById('db-filter').value = '';
+      document.getElementById('status-filter').value = '';
+      tabela.search('').columns().search('').draw();
+    }
   </script>
 </body>
 </html>
-EOF

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.3.0] - 2026-06-30
+### Added
+- **Redesign Completo do Frontend**: Nova interface profissional utilizando o framework **Tabler** (Bootstrap 5) com dark mode premium.
+- **Sidebar de Navegação**: Nova barra lateral com gradiente azul, ícones e navegação entre "Solicitar Grant" e "Auditoria".
+- **Dashboard de Auditoria**: Cards de estatística no topo da página de auditoria com contadores dinâmicos (total, ativos, revogados, erros) calculados via JavaScript.
+- **Formulário Aprimorado**: Input groups com ícones, placeholders, melhor espaçamento e feedback visual.
+- **Novo Branding**: Sistema renomeado para "Autoglass GRANT MANAGER | ATGGM" com logotipo gradiente.
+- **Badges Customizados**: Classes `badge-soft-*` para status (sucesso/revogado/erro) com cores suaves e consistentes.
+
+### Changed
+- **Template CGI**: `index.cgi` e `audit.cgi` completamente reescritos com HTML do Tabler, mantendo toda a lógica de backend inalterada.
+- **grant_reporter.sh**: Badges de status atualizados de `bg-success`/`bg-danger`/etc para `badge-soft-success`/`badge-soft-danger`/etc.
+- **Versão bump**: `v2.2.0` → `v2.3.0`.
+
 ## [v2.2.0] - 2026-06-30
 ### Added
 - **Suporte Multi-SGBD**: Catálogo `tns_catalog.conf` agora possui 4º campo `dbtype` (oracle | mysql), preparando a infraestrutura para MySQL.

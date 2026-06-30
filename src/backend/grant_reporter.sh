@@ -71,13 +71,13 @@ SELECT
     '<td>' || GRANTOR || '</td>' ||
     '<td>' || TO_CHAR(DATA_SOLICITACAO, 'DD/MM/YYYY HH24:MI') || '</td>' ||
     '<td>' || TO_CHAR(DATA_EXPIRACAO, 'DD/MM/YYYY') || '</td>' ||
-    '<td><span class="badge ' || 
+    '<td><span class="badge-soft-' || 
         CASE STATUS 
-            WHEN 'SUCESSO' THEN 'bg-success'
-            WHEN 'REVOGADO' THEN 'bg-secondary'
-            WHEN 'ERRO' THEN 'bg-danger'
-            ELSE 'bg-warning'
-        END || '">' || STATUS || '</span></td>' ||
+            WHEN 'SUCESSO' THEN 'success'
+            WHEN 'REVOGADO' THEN 'secondary'
+            WHEN 'ERRO' THEN 'danger'
+            ELSE 'warning'
+        END || ' px-2 py-1">' || STATUS || '</span></td>' ||
     '<td class="text-muted small text-truncate" style="max-width: 200px;" title="' || OBSERVACOES || '">' || 
         OBSERVACOES || 
     '</td>' ||
