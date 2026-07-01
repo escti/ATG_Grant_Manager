@@ -22,7 +22,7 @@ description: Regras de Shell Script, Python e Segurança no Backend do OGM
 - Mensagens de erro devem ser capturadas (`2>&1`) e retornadas ao usuário via alerta HTML
 
 ### Paths e Dependências
-- Usar caminhos absolutos para binários: `/usr/bin/sqlplus`, `/usr/bin/python3`, `/usr/bin/curl`
+- Usar caminhos absolutos para binários: `/usr/bin/sqlplus`, `/usr/bin/python3`
 - Arquivos de configuração (`.conf`, `.env`) em `/usr/local/bin/`
 - Fallback para caminho relativo `$(dirname "$0")/../backend/` quando executado em ambiente de desenvolvimento
 

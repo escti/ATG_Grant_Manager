@@ -377,10 +377,10 @@ Criar dois arquivos em `src/db/`:
 -- Database: orcale_grant_manager (definido no .env como MYSQL_DB)
 -- Conectar como SVC_DBA ou root e executar:
 
-CREATE DATABASE IF NOT EXISTS orcale_grant_manager
+CREATE DATABASE IF NOT EXISTS oracle_grant_manager
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE orcale_grant_manager;
+USE oracle_grant_manager;
 
 CREATE TABLE IF NOT EXISTS grant_control (
     id              INT AUTO_INCREMENT PRIMARY KEY,
@@ -408,7 +408,7 @@ CREATE TABLE IF NOT EXISTS grant_control (
 -- Evento de revogacao automatica (executa todo dia a 01:00)
 -- Necessario: SET GLOBAL event_scheduler = ON;
 
-USE orcale_grant_manager;
+USE oracle_grant_manager;
 
 DELIMITER //
 

@@ -14,7 +14,7 @@ import sys
 
 def main():
     if len(sys.argv) < 2:
-        print("<tr><td colspan='9' class='text-center py-4 text-muted'>"
+        print("<tr><td colspan='12' class='text-center py-4 text-muted'>"
               "Uso: mysql_grant_reporter.py <DB_CONN_STR></td></tr>")
         sys.exit(1)
 
@@ -28,7 +28,7 @@ def main():
     # 4. Retornar as linhas concatenadas no stdout
     # ──────────────────────────────────────────────────────────────
 
-    print(f"<tr><td colspan='9' class='text-center py-4 text-warning'>"
+    print(f"<tr><td colspan='12' class='text-center py-4 text-warning'>"
           f"mysql_grant_reporter.py ainda nao implementado. "
           f"conn={db_conn_str}</td></tr>")
     sys.exit(0)

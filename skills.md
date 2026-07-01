@@ -18,7 +18,7 @@ Este documento é a **constituição** do projeto. Define as regras fundamentais
 ## 2. Padrões de Código
 
 - **Shell Script**: Caminhos absolutos para binários, validação explícita de `$?`, tratamento de erro sem `set -e`. Detalhes em [`skills/backend.md`](skills/backend.md).
-- **CGI & Frontend**: Bootstrap 5 com dark mode (`#121212`, `#1e1e1e`). Validação de estado antes de exibir formulários. Design system completo em [`skills/frontend.md`](skills/frontend.md).
+- **CGI & Frontend**: Tabler (Bootstrap 5) com dark mode (`#0f1117`, `#1c1e2a`). Validação de estado antes de exibir formulários. Design system completo em [`skills/frontend.md`](skills/frontend.md).
 - **Python**: Placeholders (`%s`) em queries, `python-dotenv` para configuração, conexões fechadas em `finally`. Detalhes em [`skills/backend.md`](skills/backend.md).
 - **Banco de Dados**: `DBMS_ASSERT` no Oracle, tabela `GRANT_CONTROL` com colunas de rastreamento, job `DBMS_SCHEDULER` para revogação. Especificações DDL em [`skills/database.md`](skills/database.md).
 

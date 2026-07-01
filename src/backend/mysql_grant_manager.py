@@ -3,7 +3,7 @@
 #
 # Placeholder — Aguardando implementação do colega.
 # Interface esperada:
-#   python3 mysql_grant_manager.py <USUARIO> <PRIVILEGIO> <OBJETO> <GRANTOR> <JIRA_TICKET> <DB_CONN_STR>
+#   python3 mysql_grant_manager.py <USUARIO> <PRIVILEGIO> <OBJETO> <GRANTOR> <CLIENTE_IP> <MAQUINA> <USER_AGENT> <DB_CONN_STR>
 #
 # Onde:
 #   PRIVILEGIO   = "SELECT" | "INSERT, UPDATE, DELETE" | "SELECT, INSERT, UPDATE, DELETE"
@@ -17,16 +17,18 @@ import sys
 
 
 def main():
-    if len(sys.argv) < 7:
-        print("Uso: mysql_grant_manager.py <USUARIO> <PRIVILEGIO> <OBJETO> <GRANTOR> <JIRA_TICKET> <DB_CONN_STR>")
+    if len(sys.argv) < 9:
+        print("Uso: mysql_grant_manager.py <USUARIO> <PRIVILEGIO> <OBJETO> <GRANTOR> <CLIENTE_IP> <MAQUINA> <USER_AGENT> <DB_CONN_STR>")
         sys.exit(1)
 
     usuario = sys.argv[1]
     privilegio = sys.argv[2]
     objeto = sys.argv[3]
     grantor = sys.argv[4]
-    jira_ticket = sys.argv[5]
-    db_conn_str = sys.argv[6]
+    cliente_ip = sys.argv[5]
+    maquina = sys.argv[6]
+    user_agent = sys.argv[7]
+    db_conn_str = sys.argv[8]
 
     # ──────────────────────────────────────────────────────────────
     # TODO: Implementar conexao MySQL e execucao do GRANT
@@ -39,8 +41,8 @@ def main():
 
     print(f"ATENCAO: mysql_grant_manager.py ainda nao implementado. "
           f"Dados recebidos — usuario={usuario}, privilegio={privilegio}, "
-          f"objeto={objeto}, grantor={grantor}, ticket={jira_ticket}, "
-          f"conn={db_conn_str}")
+          f"objeto={objeto}, grantor={grantor}, ip={cliente_ip}, "
+          f"maquina={maquina}, agent={user_agent}, conn={db_conn_str}")
     sys.exit(0)
 
 
