@@ -25,6 +25,56 @@ else
     DB_OPTIONS="<option value=\"\" disabled>Catálogo não encontrado</option>"
 fi
 
+# === INFORMACOES DA CONEXAO DO CLIENTE (exibicao no card) ===
+DISP_IP=$(printenv REMOTE_ADDR || echo "")
+DISP_UA=$(printenv HTTP_USER_AGENT || echo "")
+DISP_MAQ=""
+if [ -n "$DISP_IP" ]; then
+    DISP_MAQ=$(python3 -c "
+import socket, sys
+try:
+    socket.setdefaulttimeout(2)
+    print(socket.gethostbyaddr(sys.argv[1])[0], end='')
+except:
+    pass
+" "$DISP_IP" 2>/dev/null || echo "")
+fi
+DISP_IP_CLEAN=$(echo "$DISP_IP" | tr -cd '[:alnum:].:')
+DISP_MAQ_CLEAN=$(echo "$DISP_MAQ" | tr -cd '[:alnum:].:-')
+DISP_UA_CLEAN=$(echo "$DISP_UA" | tr -d '[$`"\\]' | tr -cd '[:graph:][:space:]')
+[ -z "$DISP_IP_CLEAN" ] && DISP_IP_CLEAN="-"
+[ -z "$DISP_MAQ_CLEAN" ] && DISP_MAQ_CLEAN="-"
+[ -z "$DISP_UA_CLEAN" ] && DISP_UA_CLEAN="-"
+
+INFO_CARD_HTML=$(cat <<EOF
+<div class="card mb-3">
+  <div class="card-header d-flex align-items-center gap-3 py-2">
+    <i class="bi bi-info-circle text-info fs-5"></i>
+    <div>
+      <h3 class="card-title mb-0 fs-6">Informacoes da Sua Conexao</h3>
+      <p class="text-muted small mb-0">Dados coletados automaticamente para auditoria</p>
+    </div>
+  </div>
+  <div class="card-body py-2">
+    <div class="row g-2">
+      <div class="col-md-4">
+        <small class="text-muted text-uppercase" style="font-size:0.65rem;letter-spacing:0.5px;">IP do Cliente</small>
+        <div><code class="fs-6">$DISP_IP_CLEAN</code></div>
+      </div>
+      <div class="col-md-4">
+        <small class="text-muted text-uppercase" style="font-size:0.65rem;letter-spacing:0.5px;">Maquina (Reverse DNS)</small>
+        <div><code class="fs-6">$DISP_MAQ_CLEAN</code></div>
+      </div>
+      <div class="col-md-4">
+        <small class="text-muted text-uppercase" style="font-size:0.65rem;letter-spacing:0.5px;">User-Agent</small>
+        <div><code class="fs-6 small">$DISP_UA_CLEAN</code></div>
+      </div>
+    </div>
+  </div>
+</div>
+EOF
+)
+
 if [ "$REQUEST_METHOD" = "POST" ]; then
     read -n $CONTENT_LENGTH POST_DATA
     eval $(echo "$POST_DATA" | awk -F'&' '{for(i=1;i<=NF;i++){print $i}}')
@@ -187,6 +237,8 @@ cat <<EOF
         <div class="container-xl">
 
           $ALERT_HTML
+
+          $INFO_CARD_HTML
 
           <!-- Formulario -->
           <div class="card">
