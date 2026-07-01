@@ -69,7 +69,7 @@ if [ "$DB_TYPE" = "mysql" ]; then
         echo "ERRO: Script MySQL ($MYSQL_SCRIPT) não encontrado. Aguardando implementação do colega."
         exit 1
     fi
-    RESULTADO_MYSQL=$(python3 "$MYSQL_SCRIPT" "$USUARIO_GRANTED" "$PRIV_SQL" "$OBJETO" "$GRANTOR" "$JIRA_TICKET" "$DB_TNS" 2>&1)
+    RESULTADO_MYSQL=$(python3 "$MYSQL_SCRIPT" "$USUARIO_GRANTED" "$PRIV_SQL" "$OBJETO" "$GRANTOR" "$CLIENTE_IP" "$MAQUINA" "$USER_AGENT" "$DB_TNS" 2>&1)
     if [ $? -eq 0 ]; then
         echo "$RESULTADO_MYSQL"
         exit 0

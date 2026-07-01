@@ -1,45 +1,56 @@
+---
+name: skills
+description: Constituição do projeto OGM — regras imutáveis, fluxo de versão, gerenciamento de arquivos e índice de skills granulares
+---
+
 # 🧠 Skills & Diretrizes do Projeto OGM
 
-Este documento define as "skills" fundamentais e as boas práticas que devem ser seguidas por qualquer agente (humano ou IA) ao modificar este repositório.
+Este documento é a **constituição** do projeto. Define as regras fundamentais e imutáveis. Para detalhes técnicos específicos, consulte as skills granulares em [`skills/`](skills/).
+
+---
 
 ## 1. Princípios de Segurança (Core)
 
-- **Sanitização de Input**: Toda entrada de usuário em scripts CGI deve ser sanitizada para remover caracteres perigosos antes de ser passada para o Shell ou SQL (`tr`, `sed`, regex).
-- **DBMS_ASSERT**: No banco de dados, utilize obrigatoriamente `DBMS_ASSERT.SQL_OBJECT_NAME` e `DBMS_ASSERT.ENQUOTE_NAME` para prevenir SQL Injection.
-- **Mínimo Privilégio**: Nunca use o usuário `SYS` ou `SYSTEM` para operações de backend. Use um usuário de serviço (`SVC_DBA`) com privilégios restritos.
-- **Proteção de Credenciais**: Senhas nunca devem estar no código. Use variáveis de ambiente via `.env` e garanta que o arquivo tenha permissões `600`.
+- **Sanitização de Input**: Toda entrada do usuário deve ser sanitizada. Consulte [`skills/backend.md`](skills/backend.md) para regras detalhadas de `tr -cd` e [`skills/database.md`](skills/database.md) para `DBMS_ASSERT` no Oracle.
+- **Mínimo Privilégio**: Nunca use `SYS` ou `SYSTEM`. Use um usuário de serviço (`SVC_DBA`) com privilégios restritos.
+- **Proteção de Credenciais**: Senhas apenas via `.env` com permissão `600`. Nunca no código.
 
-## 2. Padrões de Código e UI
+## 2. Padrões de Código
 
-- **Shell Script**:
-    - Use caminhos absolutos para binários (`/usr/bin/sqlplus`, `/usr/bin/python3`).
-    - Sempre valide o código de retorno (`$?`) de comandos críticos.
-    - Utilize `set -e` apenas se necessário, prefira tratamento de erro explícito.
-- **CGI & Frontend**:
-    - Utilize Bootstrap 5 (CDN) para garantir responsividade.
-    - Mantenha o **Dark Mode** como padrão (palette: `#121212`, `#1e1e1e`).
-    - Valide o estado do banco antes de exibir formulários (ex: verificar se o catálogo TNS está acessível).
+- **Shell Script**: Caminhos absolutos para binários, validação explícita de `$?`, tratamento de erro sem `set -e`. Detalhes em [`skills/backend.md`](skills/backend.md).
+- **CGI & Frontend**: Bootstrap 5 com dark mode (`#121212`, `#1e1e1e`). Validação de estado antes de exibir formulários. Design system completo em [`skills/frontend.md`](skills/frontend.md).
+- **Python**: Placeholders (`%s`) em queries, `python-dotenv` para configuração, conexões fechadas em `finally`. Detalhes em [`skills/backend.md`](skills/backend.md).
+- **Banco de Dados**: `DBMS_ASSERT` no Oracle, tabela `GRANT_CONTROL` com colunas de rastreamento, job `DBMS_SCHEDULER` para revogação. Especificações DDL em [`skills/database.md`](skills/database.md).
 
 ## 3. Fluxo de Versão e CHANGELOG
 
-Seguimos rigorosamente o **Keep a Changelog** e **Semantic Versioning**:
+Seguimos **Keep a Changelog** e **Semantic Versioning**:
+- **PATCH (0.0.x)**: Correções de bugs, CSS, textos.
+- **MINOR (0.x.0)**: Novas funcionalidades sem quebra de interface.
+- **MAJOR (x.0.0)**: Mudanças arquiteturais, troca de framework.
 
-1.  **PATCH (0.0.x)**: Pequenas correções de bugs, ajustes de CSS ou textos.
-2.  **MINOR (0.x.0)**: Novas funcionalidades que não quebram a interface (ex: novo filtro, novo banco no catálogo).
-3.  **MAJOR (x.0.0)**: Mudanças arquiteturais, troca de framework ou alteração completa de fluxo.
-
-> [!IMPORTANT]
-> Toda alteração concluída DEVE ser acompanhada de uma entrada no `CHANGELOG.md` e, se houver impacto visual, a versão no rodapé da interface (`index.cgi`) deve ser atualizada.
+> Toda alteração DEVE ter entrada no `CHANGELOG.md` e, se houver impacto visual, a versão no rodapé do `index.cgi` deve ser atualizada.
 
 ## 4. Gerenciamento de Arquivos
 
-- Arquivos redundantes, protótipos ou scripts de "apoio" que não fazem parte do core devem ser movidos para a pasta `_old/`.
-- A pasta `docs/` deve conter apenas documentação em Markdown. Scripts de instalação legados devem ser limpos ou convertidos.
+- Arquivos redundantes ou protótipos → mover para `_old/`.
+- `docs/` → apenas documentação em Markdown.
+- Scripts de instalação legados → converter para Markdown ou mover para `_old/`.
 
 ## 5. Workflow de Alterações
 
-- **Registro em Git**: Ao final de toda alteração concluída, o agente DEVE perguntar ao usuário: "Deseja salvar as alterações no Git?" antes de prosseguir. Commits só devem ser feitos após confirmação explícita. Após o commit, perguntar novamente: "Deseja fazer push para o repositório remoto?"
-- **Idioma Obrigatório**: Todo comentário técnico no código (Shell, Python, SQL, HTML, CSS) E toda mensagem de commit devem ser escritos exclusivamente em **Português (Brasil)**. Nenhum comentário ou mensagem em inglês será aceito.
+- **Commits**: Sempre perguntar "Deseja salvar as alterações no Git?" antes de commitar. Após o commit, perguntar "Deseja fazer push?".
+- **Idioma**: Todo comentário técnico (Shell, Python, SQL, HTML, CSS) e toda mensagem de commit em **Português (Brasil)**. Sem inglês.
+
+## 6. Índice de Skills Granulares
+
+| Skill | Descrição |
+|-------|-----------|
+| [`skills/frontend.md`](skills/frontend.md) | Design System, paleta de cores, tipografia, dark mode, responsividade, componentes Bootstrap 5 |
+| [`skills/backend.md`](skills/backend.md) | Shell Script (sanitização, CGI, paths), Python (scripts de banco, placeholders, dotenv) |
+| [`skills/database.md`](skills/database.md) | DDL Oracle, DBMS_ASSERT, tabela GRANT_CONTROL, job de revogação automática |
+| [`skills/mysql_backend.md`](skills/mysql_backend.md) | Implementação MySQL: scripts Python, DDLs MySQL, Event Scheduler, contrato de interface |
 
 ---
+
 *Assuma a postura de um Engenheiro de Confiabilidade (SRE) / DBA Sênior ao interagir com este código.*

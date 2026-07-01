@@ -36,24 +36,26 @@ description: Regras de Banco de Dados Oracle, DDL, Segurança e Jobs
   ```
 
 ## Tabela de Auditoria (`GRANT_CONTROL`)
-- Colunas obrigatórias:
+- Colunas obrigatórias (DDL real em `src/db/CREATE_TABLE_SVC_DBA.GRANT_CONTROL.sql`):
   - `ID` (NUMBER PK, auto por sequence)
-  - `USUARIO_DESTINO` (VARCHAR2)
-  - `PRIVILEGIO` (VARCHAR2)
-  - `OBJETO` (VARCHAR2)
-  - `SOLICITANTE` (VARCHAR2)
-  - `DATA_CRIACAO` (TIMESTAMP, default SYSTIMESTAMP)
-  - `DATA_EXPIRACAO` (TIMESTAMP, default SYSTIMESTAMP + 15)
-  - `DATA_REVOGACAO` (TIMESTAMP, nullable)
-  - `STATUS` (VARCHAR2: 'ATIVO', 'REVOGADO', 'EXPIRADO')
-  - `OBSERVACOES` (VARCHAR2)
+  - `USUARIO_GRANTED` (VARCHAR2(128), NOT NULL)
+  - `PRIVILEGIO` (VARCHAR2(30), NOT NULL)
+  - `OBJETO` (VARCHAR2(128), NOT NULL)
+  - `GRANTOR` (VARCHAR2(128), NOT NULL)
+  - `DATA_SOLICITACAO` (DATE, default SYSDATE, NOT NULL)
+  - `DATA_EXPIRACAO` (DATE, default SYSDATE + 15, NOT NULL)
+  - `STATUS` (VARCHAR2(20), CHECK IN ('SUCESSO', 'ERRO', 'REVOGADO'))
+  - `OBSERVACOES` (VARCHAR2(4000))
+  - `CLIENTE_IP` (VARCHAR2(45)) — IP do cliente (REMOTE_ADDR)
+  - `MAQUINA` (VARCHAR2(128)) — Nome da máquina (reverse DNS)
+  - `USER_AGENT` (VARCHAR2(512)) — User-Agent do navegador
 
 ## Job de Revogação Automática
 - Usar `DBMS_SCHEDULER` (não `DBMS_JOB` — obsoleto)
 - Frequência: diária (ex: `FREQ=DAILY; BYHOUR=2; BYMINUTE=0`)
 - Lógica:
-  1. Selecionar registros em `GRANT_CONTROL` com `STATUS = 'ATIVO'` e `DATA_EXPIRACAO < SYSTIMESTAMP`
-  2. Para cada um: `REVOKE` o privilégio e atualizar `STATUS` para `'EXPIRADO'` e `DATA_REVOGACAO = SYSTIMESTAMP`
+  1. Selecionar registros em `GRANT_CONTROL` com `STATUS = 'SUCESSO'` e `DATA_EXPIRACAO < SYSDATE`
+  2. Para cada um: `REVOKE` o privilégio e atualizar `STATUS` para `'REVOGADO'` e `OBSERVACOES` concatenando motivo da revogação
 - Log de execução via `DBMS_OUTPUT` (para debug) e atualização direta na tabela
 
 ## Segurança

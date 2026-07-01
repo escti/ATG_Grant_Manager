@@ -12,7 +12,7 @@ description: Regras de Shell Script, Python e Segurança no Backend do OGM
   - `[:alnum:]_` para usuários, grantors, db_ids
   - `[:alnum:]_$.` para objetos
   - `[:alpha:]` para privilégios
-  - `[:alnum:]_-` para tickets Jira
+
 - **Nunca** usar `eval` com dados do usuário (exceto no pattern `eval $(echo "$POST_DATA" | awk ...)` que é o padrão aceito para parse de POST em CGI)
 - Nunca passar strings não sanitizadas para sqlplus
 
@@ -37,24 +37,25 @@ description: Regras de Shell Script, Python e Segurança no Backend do OGM
   urldecode() { : "${*//+/ }"; echo -e "${_//%/\\x}"; }
   ```
 
-## Python (Jira Validator)
+## Python (Scripts de Banco)
 
 ### Estrutura
-- Script único: `jira_validator.py`
-- Dependências mínimas: `requests`, `python-dotenv`
-- Usar `os.getenv()` para credenciais (Jira token, URL)
+- Scripts independentes para cada SGBD (ex: `mysql_grant_manager.py`, `mysql_grant_reporter.py`)
+- Dependências mínimas: `python-dotenv` para carregar `.env`, conector específico do SGBD (`mysql-connector-python`)
+- Usar `os.getenv()` ou `dotenv.load_dotenv()` para credenciais
 - Retornar strings simples para o shell (não JSON complexo)
 - `sys.exit(0)` para sucesso, `sys.exit(1)` para erro
 
 ### Segurança
 - Nunca logar tokens ou senhas
 - Usar `.env` carregado via `python-dotenv` (arquivo com permissão 600)
-- Validar SSL (`verify=True` ou `verify=/path/to/cert`)
+- Usar **placeholders** (`%s`) em todas as queries — nunca concatenar strings SQL
+- Fechar conexões (`conn.close()`) em blocos `finally` ou usar context managers
 
 ## Gerais do Backend
 
 ### Tratamento de Config
-- `tns_catalog.conf`: formato `ID|NOME|CONNECTION_STRING`, linhas com `#` são comentários
+- `tns_catalog.conf`: formato `ID|LABEL|CONEXÃO|TIPO_DB|AMBIENTE`, linhas com `#` são comentários (ex: `OGMLAB|Laboratório (OGMLAB)|(DESCRIPTION=...)|oracle|DEV`)
 - Sempre verificar se o arquivo de catálogo existe antes de ler
 - Fallback: `/usr/local/bin/tns_catalog.conf` → `./src/backend/tns_catalog.conf`
 
