@@ -35,6 +35,9 @@ GRANTOR="$4"
 DB_ID="$5"
 DB_SGBD="$6"
 DB_AMBIENTE="$7"
+CLIENTE_IP="$8"
+MAQUINA="$9"
+USER_AGENT="${10}"
 
 # 4. Validações Preliminares (Shell Level)
 if [[ -z "$USUARIO_GRANTED" || -z "$PRIVILEGIO" || -z "$OBJETO" || -z "$GRANTOR" || -z "$DB_ID" ]]; then
@@ -87,6 +90,9 @@ DECLARE
     v_objeto_raw   VARCHAR2(128) := '$OBJETO';
     v_privilegio   VARCHAR2(100) := '$PRIV_SQL'; -- Mapeado via Shell (CONSULTA/EDICAO/AMBAS)
     v_grantor      VARCHAR2(128) := '$GRANTOR';
+    v_cliente_ip   VARCHAR2(45)  := '$CLIENTE_IP';
+    v_maquina      VARCHAR2(128) := '$MAQUINA';
+    v_user_agent   VARCHAR2(512) := '$USER_AGENT';
     
     v_usuario_safe VARCHAR2(128);
     v_objeto_safe  VARCHAR2(128);
@@ -113,9 +119,9 @@ BEGIN
         
         -- Auditoria
         INSERT INTO SVC_DBA.GRANT_CONTROL 
-        (USUARIO_GRANTED, PRIVILEGIO, OBJETO, GRANTOR, STATUS, OBSERVACOES)
+        (USUARIO_GRANTED, PRIVILEGIO, OBJETO, GRANTOR, STATUS, OBSERVACOES, CLIENTE_IP, MAQUINA, USER_AGENT)
         VALUES 
-        (v_usuario_safe, v_privilegio, v_objeto_safe, v_grantor, 'SUCESSO', 'Grant aplicado via Web (Secure)');
+        (v_usuario_safe, v_privilegio, v_objeto_safe, v_grantor, 'SUCESSO', 'Grant aplicado via Web (Secure)', v_cliente_ip, v_maquina, v_user_agent);
         
         COMMIT;
         DBMS_OUTPUT.PUT_LINE('STATUS:SUCESSO');
@@ -129,9 +135,9 @@ BEGIN
             PRAGMA AUTONOMOUS_TRANSACTION;
         BEGIN
             INSERT INTO SVC_DBA.GRANT_CONTROL 
-            (USUARIO_GRANTED, PRIVILEGIO, OBJETO, GRANTOR, STATUS, OBSERVACOES)
+            (USUARIO_GRANTED, PRIVILEGIO, OBJETO, GRANTOR, STATUS, OBSERVACOES, CLIENTE_IP, MAQUINA, USER_AGENT)
             VALUES 
-            (v_usuario_raw, v_privilegio, v_objeto_raw, v_grantor, 'ERRO', v_err_msg);
+            (v_usuario_raw, v_privilegio, v_objeto_raw, v_grantor, 'ERRO', v_err_msg, v_cliente_ip, v_maquina, v_user_agent);
             COMMIT;
         END;
         

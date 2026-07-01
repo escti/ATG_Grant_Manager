@@ -46,7 +46,29 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
     SGBD_CLEAN=$(echo "$SGBD_VAL" | tr -cd '[:alpha:]')
     AMBIENTE_CLEAN=$(echo "$AMBIENTE_VAL" | tr -cd '[:alnum:]')
 
-    OUTPUT=$(/usr/local/bin/grant_manager.sh "$USUARIO_CLEAN" "$PRIVILEGIO_CLEAN" "$OBJETO_CLEAN" "$GRANTOR_CLEAN" "$DB_ID_CLEAN" "$SGBD_CLEAN" "$AMBIENTE_CLEAN")
+    # Captura de informacoes do cliente (via printenv para evitar spoofing por POST)
+    CLIENTE_IP=$(printenv REMOTE_ADDR || echo "")
+    CLIENTE_USER_AGENT=$(printenv HTTP_USER_AGENT || echo "")
+
+    # Reverse DNS para obter nome da maquina
+    MAQUINA=""
+    if [ -n "$CLIENTE_IP" ]; then
+        MAQUINA=$(python3 -c "
+import socket, sys
+try:
+    socket.setdefaulttimeout(2)
+    print(socket.gethostbyaddr(sys.argv[1])[0], end='')
+except:
+    pass
+" "$CLIENTE_IP" 2>/dev/null || echo "")
+    fi
+
+    # Sanitizacao para shell e SQL
+    CLIENTE_IP_CLEAN=$(echo "$CLIENTE_IP" | tr -cd '[:alnum:].:')
+    MAQUINA_CLEAN=$(echo "$MAQUINA" | tr -cd '[:alnum:].:-')
+    USER_AGENT_CLEAN=$(echo "$CLIENTE_USER_AGENT" | tr -d '[$`"\\]' | tr -cd '[:graph:][:space:]')
+
+    OUTPUT=$(/usr/local/bin/grant_manager.sh "$USUARIO_CLEAN" "$PRIVILEGIO_CLEAN" "$OBJETO_CLEAN" "$GRANTOR_CLEAN" "$DB_ID_CLEAN" "$SGBD_CLEAN" "$AMBIENTE_CLEAN" "$CLIENTE_IP_CLEAN" "$MAQUINA_CLEAN" "$USER_AGENT_CLEAN")
     RET_CODE=$?
 
     if [ $RET_CODE -eq 0 ]; then
@@ -261,7 +283,7 @@ cat <<EOF
               &copy; 2026 DBA Team &mdash; Seguranca &amp; Auditoria
             </div>
             <div class="col-auto text-muted small">
-              <span class="badge-soft-info px-2">v2.4.0</span>
+              <span class="badge-soft-info px-2">v2.5.0</span>
             </div>
           </div>
         </div>

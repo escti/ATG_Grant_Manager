@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.5.0] - 2026-07-01
+### Added
+- **Colunas de Auditoria de Origem**: Adicionadas colunas `CLIENTE_IP`, `MAQUINA` e `USER_AGENT` na tabela `SVC_DBA.GRANT_CONTROL` para rastrear a origem das solicitações.
+- **Captura Automática de IP**: O `index.cgi` agora captura o endereço IP do cliente via `REMOTE_ADDR` (variável CGI do Apache).
+- **Reverse DNS**: O `index.cgi` tenta resolver o nome da máquina do cliente via `socket.gethostbyaddr()` (Python).
+- **Captura de User-Agent**: O `index.cgi` captura o `HTTP_USER_AGENT` do navegador do solicitante.
+- **Exibição na Auditoria**: O painel `audit.cgi` e o relatório `grant_reporter.sh` agora exibem as 3 novas colunas (IP, Máquina, User-Agent).
+- **Migration Script**: Criado `src/db/MIGRACAO_v2.5.0_ADICIONAR_COLUNAS_AUDITORIA.sql` para aplicação manual no banco Oracle.
+- **DDL Atualizado**: `CREATE_TABLE_SVC_DBA.GRANT_CONTROL.sql` atualizado com as novas colunas.
+
+### Changed
+- **grant_manager.sh**: Agora aceita 10 parâmetros (`$1`-`$7` existentes + `$8` CLIENTE_IP, `$9` MAQUINA, `${10}` USER_AGENT) e os insere nos registros de auditoria (SUCESSO e ERRO).
+- **grant_reporter.sh**: Query atualizada para incluir `CLIENTE_IP`, `MAQUINA` e `USER_AGENT` nas linhas HTML.
+- **audit.cgi**: Tabela de auditoria expandida com 3 colunas; seletor de banco corrigido para ler 5 campos do catálogo; índice da coluna Status no JavaScript ajustado de 7 para 10.
+- **Footer**: Versão bump `v2.4.0` → `v2.5.0` em `index.cgi` e `audit.cgi`.
+
 ## [v2.4.0] - 2026-06-30
 ### Removed
 - **Integração Jira**: Removida completamente — banner, campo do formulário, validação no backend (`grant_manager.sh`), e o script `jira_validator.py` movido para `_old/`.

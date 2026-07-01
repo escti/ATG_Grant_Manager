@@ -26,7 +26,7 @@ Contém scripts CGI que geram a interface HTML com **Tabler** (framework Bootstr
 
 ### ⚙️ Backend (Motor Shell/Python) (`src/backend/`)
 Processa requisições do frontend, valida tickets e dispara comandos pro banco.
-*   `grant_manager.sh`: O script core em shell. Pega a requisição, sanitiza e chama o SQLPlus (ou roteia para MySQL via Python). Mapeia `CONSULTA`/`EDIÇÃO`/`AMBAS` para privilégios concretos. Parâmetros: `USUARIO PRIVILEGIO OBJETO GRANTOR DB_ID DB_SGBD DB_AMBIENTE`. Integração Jira removida.
+*   `grant_manager.sh`: O script core em shell. Pega a requisição, sanitiza e chama o SQLPlus (ou roteia para MySQL via Python). Mapeia `CONSULTA`/`EDIÇÃO`/`AMBAS` para privilégios concretos. Parâmetros: `USUARIO PRIVILEGIO OBJETO GRANTOR DB_ID DB_SGBD DB_AMBIENTE CLIENTE_IP MAQUINA USER_AGENT`. Integração Jira removida.
 *   `grant_reporter.sh`: Script auxiliar para gerar relatórios de grants/auditoria. Suporta roteamento para MySQL.
 *   `jira_validator.py`: ~~Script Python para validação de tickets Jira~~ — **Removido**. Movido para `_old/` na v2.4.0.
 *   `mysql_grant_manager.py`: Placeholder para implementação futura do colega — gerencia grants em MySQL.
@@ -37,6 +37,7 @@ Processa requisições do frontend, valida tickets e dispara comandos pro banco.
 ### 🗄️ Banco de Dados Oracle (`src/db/`)
 Objetos que devem ser criados dentro do Oracle (no schema `SVC_DBA`).
 *   `CREATE_TABLE_SVC_DBA.GRANT_CONTROL.sql`: DDL da tabela de auditoria que registra quem ganhou o grant e quando.
+*   `MIGRACAO_v2.5.0_ADICIONAR_COLUNAS_AUDITORIA.sql`: Migration que adiciona colunas `CLIENTE_IP`, `MAQUINA` e `USER_AGENT` para rastrear origem das solicitações.
 *   `SVC_DBA.JOB_AUTO_REVOKE_GRANTS.sql`: DDL do *Job Scheduler* nativo do Oracle que roda periodicamente para revogar acessos com mais de 15 dias.
 
 ### 📖 Documentação Adicional (`docs/`)

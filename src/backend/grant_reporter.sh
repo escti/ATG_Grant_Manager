@@ -43,7 +43,7 @@ fi
 if [ "$DB_TYPE" = "mysql" ]; then
     MYSQL_SCRIPT="$SCRIPT_DIR/mysql_grant_reporter.py"
     if [ ! -f "$MYSQL_SCRIPT" ]; then
-        echo "<tr><td colspan='9' class='text-center py-4 text-muted'>Script MySQL ($MYSQL_SCRIPT) não encontrado. Aguardando implementação do colega.</td></tr>"
+        echo "<tr><td colspan='12' class='text-center py-4 text-muted'>Script MySQL ($MYSQL_SCRIPT) não encontrado. Aguardando implementação do colega.</td></tr>"
         exit 0
     fi
     python3 "$MYSQL_SCRIPT" "$DB_TNS"
@@ -69,6 +69,9 @@ SELECT
     '<td>' || PRIVILEGIO || '</td>' ||
     '<td>' || OBJETO || '</td>' ||
     '<td>' || GRANTOR || '</td>' ||
+    '<td><code class="small">' || NVL(CLIENTE_IP, '-') || '</code></td>' ||
+    '<td><code class="small">' || NVL(MAQUINA, '-') || '</code></td>' ||
+    '<td class="text-muted small text-truncate" style="max-width:150px;" title="' || NVL(USER_AGENT, '-') || '">' || NVL(USER_AGENT, '-') || '</td>' ||
     '<td>' || TO_CHAR(DATA_SOLICITACAO, 'DD/MM/YYYY HH24:MI') || '</td>' ||
     '<td>' || TO_CHAR(DATA_EXPIRACAO, 'DD/MM/YYYY') || '</td>' ||
     '<td><span class="badge-soft-' || 

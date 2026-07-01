@@ -26,7 +26,7 @@ fi
 
 DB_OPTIONS=""
 if [ -f "$CATALOG_FILE" ]; then
-    while IFS='|' read -r dbid dbname dbstring dbtype; do
+    while IFS='|' read -r dbid dbname dbstring dbtype dbambiente; do
         [[ "$dbid" =~ ^#.* ]] && continue
         [ -z "$dbid" ] && continue
         [ -z "$dbtype" ] && dbtype="oracle"
@@ -42,7 +42,7 @@ fi
 if [ -n "$DB_ID_CLEAN" ]; then
     TABLE_ROWS=$(/usr/local/bin/grant_reporter.sh "$DB_ID_CLEAN")
 else
-    TABLE_ROWS="<tr><td colspan='9' class='text-center py-4 text-muted'>Selecione um banco de dados para carregar os relatórios de concessão e auditoria.</td></tr>"
+    TABLE_ROWS="<tr><td colspan='12' class='text-center py-4 text-muted'>Selecione um banco de dados para carregar os relatórios de concessão e auditoria.</td></tr>"
 fi
 
 # Renderiza o HTML
@@ -227,6 +227,9 @@ cat <<EOF
                       <th>Privilegio</th>
                       <th>Objeto</th>
                       <th>Solicitante</th>
+                      <th>IP Cliente</th>
+                      <th>Maquina</th>
+                      <th>User-Agent</th>
                       <th>Data Inicio</th>
                       <th>Expira em</th>
                       <th>Status</th>
@@ -254,7 +257,7 @@ cat <<EOF
             <div class="col-auto text-muted small">
               Atualizado em: $DATA_ATUAL
               &nbsp;&middot;&nbsp;
-              <span class="badge-soft-info px-2">v2.4.0</span>
+              <span class="badge-soft-info px-2">v2.5.0</span>
             </div>
           </div>
         </div>
@@ -277,7 +280,7 @@ cat <<EOF
         drawCallback: function () {
           var api = this.api();
           var total = api.rows().count();
-          var dados = api.column(7).data();
+          var dados = api.column(10).data();
           var ativos = 0, revogados = 0, erros = 0;
           dados.each(function (val) {
             var s = val.replace(/<[^>]+>/g, '').trim().toUpperCase();

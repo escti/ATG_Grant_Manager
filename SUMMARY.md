@@ -1,7 +1,7 @@
 # 📋 SUMMARY — Oracle Grant Manager (OGM)
 
 **Stack:** Bash CGI + Bootstrap 5.3 + Python 3 + Oracle 19c  
-**Versão Atual:** `v2.4.0`  
+**Versão Atual:** `v2.5.0`  
 **Padrão:** Keep a Changelog + Semantic Versioning
 
 ---
