@@ -118,7 +118,7 @@ cat <<EOF
           <ul class="navbar-nav pt-4">
             <li class="nav-item mb-1">
               <a class="nav-link active" href="index.cgi">
-                <i class="bi bi-shield-check me-2"></i> Solicitar Grant
+                <i class="bi bi-shield-check me-2"></i> Solicitacao de Grants
               </a>
             </li>
             <li class="nav-item mb-1">
@@ -134,13 +134,20 @@ cat <<EOF
     <!-- CONTEUDO -->
     <div class="page-wrapper">
 
+      <!-- Branding -->
+      <div class="container-xl pt-3 pb-1">
+        <h1 style="font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #3584e4, #62a0ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">
+          ATGGM &mdash; Autoglass Grant Manager
+        </h1>
+      </div>
+
       <!-- Header -->
       <div class="page-header d-print-none">
         <div class="container-xl">
           <div class="row g-3 align-items-center">
             <div class="col">
               <h2 class="page-title">
-                Solicitar Grant
+                Solicitacao de Grants
                 <small>Preencha o formulario para conceder acesso temporario a um banco de dados</small>
               </h2>
             </div>
