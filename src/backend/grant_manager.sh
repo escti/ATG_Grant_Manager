@@ -20,8 +20,6 @@ fi
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 ENV_FILE="$SCRIPT_DIR/.env"
 CATALOG_FILE="$SCRIPT_DIR/tns_catalog.conf"
-JIRA_SCRIPT="$SCRIPT_DIR/jira_validator.py"
-
 if [ -f "$ENV_FILE" ]; then
     source "$ENV_FILE"
 else
@@ -34,23 +32,17 @@ USUARIO_GRANTED="$1"
 PRIVILEGIO="$2"
 OBJETO="$3"
 GRANTOR="$4"
-JIRA_TICKET="$5"
-DB_ID="$6"
+DB_ID="$5"
+DB_SGBD="$6"
+DB_AMBIENTE="$7"
 
 # 4. Validações Preliminares (Shell Level)
-if [[ -z "$USUARIO_GRANTED" || -z "$PRIVILEGIO" || -z "$OBJETO" || -z "$GRANTOR" || -z "$JIRA_TICKET" || -z "$DB_ID" ]]; then
-    echo "ERRO: Parâmetros insuficientes. Chamado Jira e Banco são obrigatórios."
+if [[ -z "$USUARIO_GRANTED" || -z "$PRIVILEGIO" || -z "$OBJETO" || -z "$GRANTOR" || -z "$DB_ID" ]]; then
+    echo "ERRO: Parâmetros insuficientes. Usuário, Privilégio, Objeto, Grantor e Banco são obrigatórios."
     exit 1
 fi
 
-# 4.1 Validação do Jira Ticket
-JIRA_OUTPUT=$(python3 "$JIRA_SCRIPT" "$JIRA_TICKET" 2>&1)
-if [ $? -ne 0 ]; then
-    echo "$JIRA_OUTPUT"
-    exit 1
-fi
-
-# 4.2 Carregar TNS String e Tipo do Banco Alvo
+# 4.1 Carregar TNS String e Tipo do Banco Alvo
 DB_TNS=$(awk -F'|' -v id="$DB_ID" '$1==id {print $3}' "$CATALOG_FILE")
 DB_TYPE=$(awk -F'|' -v id="$DB_ID" '$1==id {print $4}' "$CATALOG_FILE")
 [ -z "$DB_TYPE" ] && DB_TYPE="oracle"

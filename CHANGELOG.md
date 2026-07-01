@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.4.0] - 2026-06-30
+### Removed
+- **Integração Jira**: Removida completamente — banner, campo do formulário, validação no backend (`grant_manager.sh`), e o script `jira_validator.py` movido para `_old/`.
+- **Variáveis Jira do `.env.example`**: `JIRA_BASE_URL`, `JIRA_USER`, `JIRA_API_TOKEN`, `JIRA_APPROVAL_FIELD`, `JIRA_EXPECTED_APPROVAL_VALUE`.
+
+### Added
+- **Dropdown SGBD**: Novo seletor no formulário com opções `Oracle` e `MySQL`.
+- **Dropdown Ambiente**: Novo seletor com opções `HML` e `DEV`.
+- **Filtro Dinâmico**: JavaScript que filtra o dropdown "Banco Alvo" conforme SGBD e Ambiente selecionados.
+- **5º campo no catálogo**: `tns_catalog.conf` agora possui campo `AMBIENTE` (DEV/HML/PRD) para suporte à filtragem.
+
+### Changed
+- **grant_manager.sh**: Parâmetros atualizados — Jira removido, `$5` passa a ser `DB_ID`, `$6` = `DB_SGBD`, `$7` = `DB_AMBIENTE`.
+- **index.cgi**: Formulário reorganizado com SGBD+Ambiente antes do Banco Alvo.
+- **Footer**: Versão bump `v2.3.0` → `v2.4.0`.
+
 ## [v2.3.0] - 2026-06-30
 ### Added
 - **Redesign Completo do Frontend**: Nova interface profissional utilizando o framework **Tabler** (Bootstrap 5) com dark mode premium.

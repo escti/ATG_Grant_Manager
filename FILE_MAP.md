@@ -26,12 +26,12 @@ Contém scripts CGI que geram a interface HTML com **Tabler** (framework Bootstr
 
 ### ⚙️ Backend (Motor Shell/Python) (`src/backend/`)
 Processa requisições do frontend, valida tickets e dispara comandos pro banco.
-*   `grant_manager.sh`: O script core em shell. Pega a requisição, valida, sanitiza e chama o SQLPlus (ou roteia para MySQL via Python). Agora mapeia `CONSULTA`/`EDIÇÃO`/`AMBAS` para privilégios concretos.
+*   `grant_manager.sh`: O script core em shell. Pega a requisição, sanitiza e chama o SQLPlus (ou roteia para MySQL via Python). Mapeia `CONSULTA`/`EDIÇÃO`/`AMBAS` para privilégios concretos. Parâmetros: `USUARIO PRIVILEGIO OBJETO GRANTOR DB_ID DB_SGBD DB_AMBIENTE`. Integração Jira removida.
 *   `grant_reporter.sh`: Script auxiliar para gerar relatórios de grants/auditoria. Suporta roteamento para MySQL.
-*   `jira_validator.py`: Script Python chamado pelo bash para se comunicar via API com o Jira e confirmar se o ticket do solicitante é válido e está aprovado.
+*   `jira_validator.py`: ~~Script Python para validação de tickets Jira~~ — **Removido**. Movido para `_old/` na v2.4.0.
 *   `mysql_grant_manager.py`: Placeholder para implementação futura do colega — gerencia grants em MySQL.
 *   `mysql_grant_reporter.py`: Placeholder para implementação futura do colega — relatórios de auditoria MySQL.
-*   `tns_catalog.conf`: Configuração com os apontamentos de banco (TNS) para a aplicação ser multi-instância. Formato: `ID|LABEL|CONEXÃO|TIPO_DB` (TIPO_DB = oracle ou mysql).
+*   `tns_catalog.conf`: Configuração com os apontamentos de banco (TNS) para a aplicação ser multi-instância. Formato: `ID|LABEL|CONEXÃO|TIPO_DB|AMBIENTE` (TIPO_DB = oracle ou mysql; AMBIENTE = DEV, HML ou PRD).
 *   `.env` / `.env.example`: Arquivo (e seu template) que guarda as senhas sensíveis (Jira Token, Senha Banco, etc). Agora inclui seção MySQL.
 
 ### 🗄️ Banco de Dados Oracle (`src/db/`)

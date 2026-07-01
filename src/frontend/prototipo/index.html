@@ -38,7 +38,7 @@
     .alert-danger { background: rgba(255, 71, 87, 0.1); border-left: 4px solid #ff4757; color: #ff4757; }
     .alert-info { background: rgba(53, 132, 228, 0.1); border-left: 4px solid #3584e4; color: #62a0ea; }
     .page-title { font-size: 1.3rem; font-weight: 700; color: #e6e7ed; }
-    .page-title small { font-size: 0.8rem; font-weight: 400; color: #8b8fa3; display: block; }
+    .page-title small { font-size: 0.8rem; font-weight: 400; color: #8b8fa3; display: block; margin-top: 4px; }
     .divider { border-color: #2a2d3a; opacity: 0.6; }
     hr { border-color: #2a2d3a; }
     .footer { border-top: 1px solid #2a2d3a; }
@@ -112,15 +112,6 @@
           <!-- Alert de exemplo (simula sucesso/erro) -->
           <div id="alert-area"></div>
 
-          <!-- Banner Jira -->
-          <div class="alert alert-info d-flex align-items-center gap-3 mb-4" role="alert">
-            <i class="bi bi-info-circle-fill fs-4"></i>
-            <div>
-              <strong>Atenção:</strong> É necessário ter um chamado aprovado pelo Gestor para prosseguir.
-              <a href="#" class="alert-link ms-1">Clique aqui para abrir seu chamado de acesso ao banco.</a>
-            </div>
-          </div>
-
           <!-- Formulario -->
           <div class="card">
             <div class="card-header d-flex align-items-center gap-3">
@@ -136,22 +127,28 @@
                 <!-- Linha 1 -->
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
-                    <label class="form-label" for="db_id">Banco Alvo</label>
-                    <select class="form-select" id="db_id" required>
-                      <option value="" disabled selected>Selecione o banco...</option>
-                      <option value="OGMLAB">Banco de Laboratório (OGMLAB)</option>
-                      <option value="MYSQL01">MySQL — Dev (MYSQL01)</option>
+                    <label class="form-label" for="db_sgbd">SGBD</label>
+                    <select class="form-select" id="db_sgbd" onchange="filtrarBancos()">
+                      <option value="oracle" selected>Oracle</option>
+                      <option value="mysql">MySQL</option>
                     </select>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label" for="jira_ticket">Chamado Jira (Aprovado)</label>
-                    <div class="input-group">
-                      <span class="input-group-text bg-dark border-secondary">
-                        <i class="bi bi-ticket"></i>
-                      </span>
-                      <input type="text" class="form-control" id="jira_ticket" placeholder="Ex: ATG-1234" required>
-                    </div>
+                    <label class="form-label" for="db_ambiente">Ambiente</label>
+                    <select class="form-select" id="db_ambiente" onchange="filtrarBancos()">
+                      <option value="HML">HML</option>
+                      <option value="DEV" selected>DEV</option>
+                    </select>
                   </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label" for="db_id">Banco Alvo</label>
+                  <select class="form-select" id="db_id" required>
+                    <option value="" disabled selected>Selecione o banco...</option>
+                    <option value="OGMLAB" data-sgbd="oracle" data-ambiente="DEV">Laboratório (OGMLAB)</option>
+                    <option value="MYSQL01" data-sgbd="mysql" data-ambiente="DEV">MySQL — Dev (MYSQL01)</option>
+                  </select>
                 </div>
 
                 <!-- Linha 2 -->
@@ -222,7 +219,7 @@
               &copy; 2026 DBA Team — Segurança &amp; Auditoria
             </div>
             <div class="col-auto text-muted small">
-              <span class="badge-soft-info px-2">v2.3.0</span>
+              <span class="badge-soft-info px-2">v2.4.0</span>
             </div>
           </div>
         </div>
@@ -232,6 +229,28 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
   <script>
+    function filtrarBancos() {
+      var sgbd = document.getElementById('db_sgbd').value;
+      var ambiente = document.getElementById('db_ambiente').value;
+      var selectBanco = document.getElementById('db_id');
+      var options = selectBanco.querySelectorAll('option[data-sgbd]');
+      var temVisivel = false;
+      options.forEach(function(opt) {
+        if (opt.getAttribute('data-sgbd') === sgbd && opt.getAttribute('data-ambiente') === ambiente) {
+          opt.style.display = '';
+          temVisivel = true;
+        } else {
+          opt.style.display = 'none';
+        }
+      });
+      selectBanco.value = '';
+      var placeholder = selectBanco.querySelector('option[disabled]');
+      if (placeholder) {
+        placeholder.textContent = temVisivel ? 'Selecione o banco...' : 'Nenhum banco disponivel para este SGBD/Ambiente';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', filtrarBancos);
+
     function simularEnvio(e) {
       e.preventDefault();
       var alertArea = document.getElementById('alert-area');

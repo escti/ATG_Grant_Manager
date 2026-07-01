@@ -14,11 +14,12 @@ fi
 
 DB_OPTIONS=""
 if [ -f "$CATALOG_FILE" ]; then
-    while IFS='|' read -r dbid dbname dbstring dbtype; do
+    while IFS='|' read -r dbid dbname dbstring dbtype dbambiente; do
         [[ "$dbid" =~ ^#.* ]] && continue
         [ -z "$dbid" ] && continue
         [ -z "$dbtype" ] && dbtype="oracle"
-        DB_OPTIONS+="<option value=\"$dbid\">$dbname</option>"
+        [ -z "$dbambiente" ] && dbambiente="DEV"
+        DB_OPTIONS+="<option value=\"$dbid\" data-sgbd=\"$dbtype\" data-ambiente=\"$dbambiente\">$dbname</option>"
     done < "$CATALOG_FILE"
 else
     DB_OPTIONS="<option value=\"\" disabled>Catálogo não encontrado</option>"
@@ -32,18 +33,20 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
     PRIVILEGIO_VAL=$(urldecode "$privilegio")
     OBJETO_VAL=$(urldecode "$objeto")
     GRANTOR_VAL=$(urldecode "$grantor")
-    JIRA_TICKET_VAL=$(urldecode "$jira_ticket")
     DB_ID_VAL=$(urldecode "$db_id")
-    
+    SGBD_VAL=$(urldecode "$db_sgbd")
+    AMBIENTE_VAL=$(urldecode "$db_ambiente")
+
     # Sanitização Shell
     USUARIO_CLEAN=$(echo "$USUARIO_VAL" | tr -cd '[:alnum:]_')
     OBJETO_CLEAN=$(echo "$OBJETO_VAL" | tr -cd '[:alnum:]_$.')
     GRANTOR_CLEAN=$(echo "$GRANTOR_VAL" | tr -cd '[:alnum:]_')
     PRIVILEGIO_CLEAN=$(echo "$PRIVILEGIO_VAL" | tr -cd '[:alpha:]')
-    JIRA_TICKET_CLEAN=$(echo "$JIRA_TICKET_VAL" | tr -cd '[:alnum:]_-')
     DB_ID_CLEAN=$(echo "$DB_ID_VAL" | tr -cd '[:alnum:]_')
+    SGBD_CLEAN=$(echo "$SGBD_VAL" | tr -cd '[:alpha:]')
+    AMBIENTE_CLEAN=$(echo "$AMBIENTE_VAL" | tr -cd '[:alnum:]')
 
-    OUTPUT=$(/usr/local/bin/grant_manager.sh "$USUARIO_CLEAN" "$PRIVILEGIO_CLEAN" "$OBJETO_CLEAN" "$GRANTOR_CLEAN" "$JIRA_TICKET_CLEAN" "$DB_ID_CLEAN")
+    OUTPUT=$(/usr/local/bin/grant_manager.sh "$USUARIO_CLEAN" "$PRIVILEGIO_CLEAN" "$OBJETO_CLEAN" "$GRANTOR_CLEAN" "$DB_ID_CLEAN" "$SGBD_CLEAN" "$AMBIENTE_CLEAN")
     RET_CODE=$?
 
     if [ $RET_CODE -eq 0 ]; then
@@ -85,7 +88,7 @@ cat <<EOF
     .btn-outline-primary { border-color: #3584e4; color: #3584e4; border-radius: 8px; }
     .btn-outline-primary:hover { background: #3584e4; border-color: #3584e4; }
     .page-title { font-size: 1.3rem; font-weight: 700; color: #e6e7ed; }
-    .page-title small { font-size: 0.8rem; font-weight: 400; color: #8b8fa3; display: block; }
+    .page-title small { font-size: 0.8rem; font-weight: 400; color: #8b8fa3; display: block; margin-top: 4px; }
     .alert { border-radius: 10px; border: none; }
     .alert-success { background: rgba(46, 213, 115, 0.1); border-left: 4px solid #2ed573; color: #2ed573; }
     .alert-danger { background: rgba(255, 71, 87, 0.1); border-left: 4px solid #ff4757; color: #ff4757; }
@@ -156,15 +159,6 @@ cat <<EOF
 
           $ALERT_HTML
 
-          <!-- Banner Jira -->
-          <div class="alert alert-info d-flex align-items-center gap-3 mb-4" role="alert">
-            <i class="bi bi-info-circle-fill fs-4"></i>
-            <div>
-              <strong>Atencao:</strong> E necessario ter um chamado aprovado pelo Gestor para prosseguir.
-              <a href="https://jira.autoglass.com.br/servicedesk/customer/portal/exemplo" target="_blank" class="alert-link ms-1">Clique aqui para abrir seu chamado de acesso ao banco.</a>
-            </div>
-          </div>
-
           <!-- Formulario -->
           <div class="card">
             <div class="card-header d-flex align-items-center gap-3">
@@ -179,19 +173,27 @@ cat <<EOF
 
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
-                    <label class="form-label" for="db_id">Banco Alvo</label>
-                    <select class="form-select" id="db_id" name="db_id" required>
-                      <option value="" disabled selected>Selecione o banco...</option>
-                      $DB_OPTIONS
+                    <label class="form-label" for="db_sgbd">SGBD</label>
+                    <select class="form-select" id="db_sgbd" name="db_sgbd" onchange="filtrarBancos()">
+                      <option value="oracle" selected>Oracle</option>
+                      <option value="mysql">MySQL</option>
                     </select>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label" for="jira_ticket">Chamado Jira (Aprovado)</label>
-                    <div class="input-group">
-                      <span class="input-group-text bg-dark border-secondary"><i class="bi bi-ticket"></i></span>
-                      <input type="text" class="form-control" id="jira_ticket" name="jira_ticket" required placeholder="Ex: ATG-1234">
-                    </div>
+                    <label class="form-label" for="db_ambiente">Ambiente</label>
+                    <select class="form-select" id="db_ambiente" name="db_ambiente" onchange="filtrarBancos()">
+                      <option value="HML">HML</option>
+                      <option value="DEV" selected>DEV</option>
+                    </select>
                   </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label" for="db_id">Banco Alvo</label>
+                  <select class="form-select" id="db_id" name="db_id" required>
+                    <option value="" disabled selected>Selecione o banco...</option>
+                    $DB_OPTIONS
+                  </select>
                 </div>
 
                 <div class="mb-3">
@@ -252,7 +254,7 @@ cat <<EOF
               &copy; 2026 DBA Team &mdash; Seguranca &amp; Auditoria
             </div>
             <div class="col-auto text-muted small">
-              <span class="badge-soft-info px-2">v2.3.0</span>
+              <span class="badge-soft-info px-2">v2.4.0</span>
             </div>
           </div>
         </div>
@@ -261,6 +263,29 @@ cat <<EOF
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <script>
+    function filtrarBancos() {
+      var sgbd = document.getElementById('db_sgbd').value;
+      var ambiente = document.getElementById('db_ambiente').value;
+      var selectBanco = document.getElementById('db_id');
+      var options = selectBanco.querySelectorAll('option[data-sgbd]');
+      var temVisivel = false;
+      options.forEach(function(opt) {
+        if (opt.getAttribute('data-sgbd') === sgbd && opt.getAttribute('data-ambiente') === ambiente) {
+          opt.style.display = '';
+          temVisivel = true;
+        } else {
+          opt.style.display = 'none';
+        }
+      });
+      selectBanco.value = '';
+      var placeholder = selectBanco.querySelector('option[disabled]');
+      if (placeholder) {
+        placeholder.textContent = temVisivel ? 'Selecione o banco...' : 'Nenhum banco disponivel para este SGBD/Ambiente';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', filtrarBancos);
+  </script>
 </body>
 </html>
 EOF

@@ -254,7 +254,7 @@ cat <<EOF
             <div class="col-auto text-muted small">
               Atualizado em: $DATA_ATUAL
               &nbsp;&middot;&nbsp;
-              <span class="badge-soft-info px-2">v2.3.0</span>
+              <span class="badge-soft-info px-2">v2.4.0</span>
             </div>
           </div>
         </div>
